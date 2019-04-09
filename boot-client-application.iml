@@ -54,5 +54,6 @@
     <orderEntry type="library" name="Maven: org.apache.tomcat.embed:tomcat-embed-el:8.5.11" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jdt.core.compiler:ecj:4.5.1" level="project" />
     <orderEntry type="library" name="Maven: javax.servlet:jstl:1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.projectlombok:lombok:1.16.14" level="project" />
   </component>
 </module>

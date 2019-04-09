@@ -1,4 +1,4 @@
-package com.oauth.model;
+package com.maxmin.tda.model;
 
 public class Employee {
 

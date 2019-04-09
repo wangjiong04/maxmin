@@ -1,4 +1,4 @@
-package com.oauth;
+package com.maxmin.tda;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
