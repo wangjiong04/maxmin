@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/boot-client-application.iml" filepath="$PROJECT_DIR$/boot-client-application.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tda-trade.iml" filepath="$PROJECT_DIR$/tda-trade.iml" />
     </modules>
   </component>
 </project>
