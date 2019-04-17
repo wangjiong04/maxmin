@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+    <title>Get Access Token from TD Ameritrade</title>
+</head>
+<body>
+<h3 style="color: red;">Get Access Token from TD Ameritrade</h3>
+
+<div>
+    <form th:action="@{/redirectPage}"
+          method="post">
+
+        <table>
+            <tr>
+                <td>
+                    <label>response_type</label>
+                </td>
+                <td>
+                    <input type="text" name="response_type" value="code" th:width="200px"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>client_id</label>
+                </td>
+                <td>
+                    <input type="text" name="client_id" value="W12345678@AMER.OAUTHAP" th:width="200px"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>redirect_uri</label>
+                </td>
+                <td>
+                    <input type="text" name="redirect_uri"
+                           value="http://tda-trade.us-east-1.elasticbeanstalk.com/app/api/connect"
+                           width="400px"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="SUBMIT" value="Get Token"/>
+                </td>
+                <td>
+
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+</body>
+</html>

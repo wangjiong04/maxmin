@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,17 +32,12 @@ import java.util.Arrays;
 @Controller
 public class TdaController {
 
-    @RequestMapping(value = "/getToken", method = RequestMethod.GET)
-    public ModelAndView getEmployeeInfo() {
-        return new ModelAndView("getToken");
-    }
-
     @PostMapping(value = "redirectPage")
     public void redirect(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String url = "https://auth.tdameritrade.com/auth?response_type=code&redirect_uri=" + URLEncoder
-                .encode("https://localhost:3001/app/api/connect",
+                .encode(request.getParameter("redirect_uri"),
                         StandardCharsets.UTF_8.displayName()) + "&client_id=" + URLEncoder
-                .encode("YAKOBUX999911@AMER.OAUTHAP", StandardCharsets.UTF_8.displayName());
+                .encode(request.getParameter("client_id"), StandardCharsets.UTF_8.displayName());
         response.sendRedirect(url);
     }
 
@@ -57,8 +53,8 @@ public class TdaController {
         body.add("access_type", "offline");
         body.add("code", code);
         body.add("grant_type", "authorization_code");
-        body.add("client_id", "YAKOBUX999911@AMER.OAUTHAP");
-        body.add("redirect_uri", "https://localhost:3001/app/api/connect");
+        body.add("client_id", "W12345678@AMER.OAUTHAP");
+        body.add("redirect_uri", "http://localhost:5000/app/api/connect");
         HttpEntity entity = new HttpEntity<>(body, headers);
 
         String access_token_url = "https://api.tdameritrade.com/v1/oauth2/token";
@@ -78,6 +74,11 @@ public class TdaController {
         ModelAndView model = new ModelAndView("showContent");
         model.addObject("symbol", respponse.getBody());
         return model;
+    }
+
+    @GetMapping(value = "/")
+    public ModelAndView defaultPage() {
+        return new ModelAndView("default");
     }
 
     @RequestMapping(value = "/showEmployees", method = RequestMethod.GET)
