@@ -55,7 +55,7 @@ public class TdaController {
     @RequestMapping(value = "app/api/connect", method = {RequestMethod.GET, RequestMethod.POST})
     public ModelAndView getCode(@RequestParam("code") String code) throws IOException {
         ResponseEntity<String> response = null;
-        System.out.println("Authorization Ccode------" + code);
+        System.out.println("Authorization Code------" + code);
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -64,8 +64,8 @@ public class TdaController {
         body.add("access_type", "offline");
         body.add("code", code);
         body.add("grant_type", "authorization_code");
-        body.add("client_id", "W12345678@AMER.OAUTHAP");
-        body.add("redirect_uri", "http://localhost:5000/app/api/connect");
+        body.add("client_id", client_id);
+        body.add("redirect_uri", redirect_uri);
         HttpEntity entity = new HttpEntity<>(body, headers);
 
         String access_token_url = "https://api.tdameritrade.com/v1/oauth2/token";
