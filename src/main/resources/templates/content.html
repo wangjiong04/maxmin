@@ -1,10 +1,46 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"/>
     <title>Title</title>
 </head>
 <body>
-<li th:text="${symbol}"></li>
+<form th:action="@{/getSymbols}" method="post">
+    Symbols: <input type="text" name="symbols" th:value="${symbols}" style="width:200px"/><br/>
+    <table border="1">
+        <tr>
+            <th>index</th>
+            <th>Symbol</th>
+            <th>Description</th>
+            <th>LastPrice</th>
+            <th>LastSize</th>
+            <th>OpenPrice</th>
+            <th>highPrice</th>
+            <th>lowPrice</th>
+            <th>closePrice</th>
+            <th>netChange</th>
+            <th>totalVolume</th>
+            <th>exchangeName</th>
+        </tr>
+        <tr th:each="quote,listStat : ${list}">
+            <th th:text="${listStat.index}"></th>
+            <td th:text="${quote.symbol}"></td>
+            <td th:text="${quote.description}"></td>
+            <th th:text="${quote.lastPrice}"></th>
+            <th th:text="${quote.lastSize}"></th>
+            <th th:text="${quote.openPrice}"></th>
+            <th th:text="${quote.highPrice}"></th>
+            <th th:text="${quote.lowPrice}"></th>
+            <th th:text="${quote.closePrice}"></th>
+            <th th:text="${quote.netChange}"></th>
+            <th th:text="${quote.totalVolume}"></th>
+            <th th:text="${quote.exchangeName}"></th>
+        </tr>
+    </table>
+    <br/>
+    <input type="SUBMIT" value="Refresh"/>
+    <input type="hidden" name="token" th:value="${token}"/>
+</form>
+
 </body>
 </html>

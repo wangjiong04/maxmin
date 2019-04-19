@@ -9,7 +9,7 @@
 
 <div>
     <form th:action="@{/redirectPage}"
-          method="post">
+          method="post" th:object="${config}">
 
         <table>
             <tr>
@@ -17,7 +17,7 @@
                     <label>response_type</label>
                 </td>
                 <td>
-                    <input type="text" name="response_type" value="code" th:width="200px"/>
+                    <input type="text" name="response_type" value="code"/>
                 </td>
             </tr>
             <tr>
@@ -25,7 +25,7 @@
                     <label>client_id</label>
                 </td>
                 <td>
-                    <input type="text" name="client_id" value="W12345678@AMER.OAUTHAP" th:width="200px"/>
+                    <input type="text" name="client_id" th:value="*{client_id}" style="width:300px"/>
                 </td>
             </tr>
             <tr>
@@ -34,8 +34,8 @@
                 </td>
                 <td>
                     <input type="text" name="redirect_uri"
-                           value="http://tda-trade.us-east-1.elasticbeanstalk.com/app/api/connect"
-                           width="400px"/>
+                           th:value="*{redirect_uri}"
+                           style="width:500px"/>
                 </td>
             </tr>
             <tr>
