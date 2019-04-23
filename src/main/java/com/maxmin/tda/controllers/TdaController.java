@@ -3,6 +3,7 @@ package com.maxmin.tda.controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxmin.tda.dto.Config;
+import com.maxmin.tda.dto.MyPojo;
 import com.maxmin.tda.dto.Quote;
 import com.maxmin.tda.dto.Token;
 import com.maxmin.tda.utils.ObjectMapperFactory;
@@ -50,6 +51,11 @@ public class TdaController {
                         StandardCharsets.UTF_8.displayName()) + "&client_id=" + URLEncoder
                 .encode(request.getParameter("client_id"), StandardCharsets.UTF_8.displayName());
         response.sendRedirect(url);
+    }
+
+    @GetMapping(value = "/gJson", produces = MediaType.APPLICATION_JSON_VALUE)
+    public MyPojo gJson() {
+        return new MyPojo("Windows 10", System.currentTimeMillis());
     }
 
     @RequestMapping(value = "app/api/connect", method = {RequestMethod.GET, RequestMethod.POST})
