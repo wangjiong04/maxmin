@@ -40,20 +40,25 @@
     </table>
     <br/>
     <input type="SUBMIT" value="Refresh"/>
-    <input type="hidden" name="token" th:value="${token}"/>
 </form>
 
 </body>
 <script type="text/javascript">
     $(function () {
+        var $form = $(this),
+            symbols = $form.find("input[name='symbols']").val();
+
         window.setInterval(function () {
+            console.log(symbols);
             $.ajax({
                 type: "POST",
-                url: "/getSymbols",
+                url: "/getSymbols1",
+                data: {symbols: symbols},
                 success: function (data) {
                     console.log(data);
                 }
-            });
+            })
+            ;
         }, 10000);
     });
 </script>
