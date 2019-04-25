@@ -7,24 +7,33 @@
     <script type="text/javascript">
         $(function () {
             window.setInterval(function () {
-
                 symbols = $("#txtSymbols").val();
+                seconds=$("#drpSeconds").val();
                 $.ajax({
                     type: "POST",
                     url: "/getSymbols",
-                    data: {symbols: symbols},
+                    data: {symbols: symbols,seconds: seconds},
                     success: function (data) {
-                        console.log(data);
+                        $("#result").html(data);
                     }
                 })
                 ;
-            }, 10000);
+            }, $("#drpSeconds").val()*1000);
         });
     </script>
 </head>
 <body>
-<form th:action="@{/getSymbols}" method="post">
-    Symbols: <input type="text" id="txtSymbols" name="symbols" th:value="${symbols}" style="width:200px"/><br/>
+
+<div id="result">
+    Symbols: <input type="text" id="txtSymbols" name="symbols" th:value="${symbols}" style="width:200px"/>
+    &nbsp; &nbsp; &nbsp; &nbsp;
+    Refresh Seconds: <select id="drpSeconds" th:value="${seconds}">
+    <option value="5">5</option>
+    <option value="10">10</option>
+    <option value="15">15</option>
+    <option value="20">20</option>
+</select>
+    <br/>
     <table border="1">
         <tr>
             <th>index</th>
@@ -55,9 +64,7 @@
             <th th:text="${quote.exchangeName}"></th>
         </tr>
     </table>
-    <br/>
-    <input type="SUBMIT" value="Refresh"/>
-</form>
+</div>
 
 </body>
 

@@ -56,11 +56,13 @@ public class TdaController {
     public RedirectView getSymbols(HttpServletRequest request,
                                    RedirectAttributes redirectAttributes) throws IOException {
         String symbols = request.getParameter("symbols");
+        String seconds=request.getParameter("seconds");
         List<Quote> list = tdaClient.getQuotes(symbols);
         RedirectView redirectView = new RedirectView();
 
         redirectAttributes.addFlashAttribute("list", list);
         redirectAttributes.addFlashAttribute("symbols", symbols);
+        redirectAttributes.addFlashAttribute("seconds", seconds);
         redirectView.setContextRelative(true);
         redirectView.setUrl("/showSymbols");
         return redirectView;
@@ -77,9 +79,11 @@ public class TdaController {
         Map<String, ?> flashMap = RequestContextUtils.getInputFlashMap(request);
         List<Quote> list = (List<Quote>) flashMap.get("list");
         String symbols = (String) flashMap.get("symbols");
+        String seconds = (String) flashMap.get("seconds");
         ModelAndView model = new ModelAndView("content");
         model.addObject("list", list);
         model.addObject("symbols", symbols);
+        model.addObject("seconds", seconds);
         return model;
     }
 
