@@ -3,28 +3,8 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Title</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script type="text/javascript">
-        $(function () {
-            window.setInterval(function () {
-                symbols = $("#txtSymbols").val();
-                $.ajax({
-                    type: "GET",
-                    url: "/getSymbols",
-                    data: {symbols: symbols},
-                    success: function (data) {
-                        $("#result").empty().append(data);
-                    },
-                    async: false
-                })
-                ;
-            }, 5 * 1000);
-        });
-    </script>
 </head>
 <body>
-Symbols: <input type="text" id="txtSymbols" name="symbols" th:value="${symbols}" style="width:200px"/>
-<br/>
 <div id="result">
     <table border="1">
         <tr>
