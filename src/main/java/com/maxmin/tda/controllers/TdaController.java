@@ -36,20 +36,17 @@ public class TdaController {
         response.sendRedirect(url);
     }
 
+
+
     @RequestMapping(value = "app/api/connect", method = {RequestMethod.GET, RequestMethod.POST})
-    public ModelAndView getCode(@RequestParam("code") String code) throws IOException {
-        ResponseEntity<String> response = null;
+    public void  getCode(@RequestParam("code") String code,HttpServletResponse response) throws IOException {
+
         System.out.println("Authorization Code------" + code);
 
         tdaClient.getTokeByCode(code);
 
         System.out.println("Access Token Response ---------" + tdaClient.getToken().getAccess_token());
-        List<Quote> list = tdaClient.getQuotes("BA,PG");
-
-        ModelAndView model = new ModelAndView("content");
-        model.addObject("list", list);
-        model.addObject("symbols", "BA,PG");
-        return model;
+        response.sendRedirect("/content");
     }
 
     @RequestMapping(value = "getSymbols", method = RequestMethod.GET)
@@ -66,10 +63,14 @@ public class TdaController {
         return redirectView;
     }
 
-    @RequestMapping(value = "getSymbols1")
-    public List<Quote> getSymbols(HttpServletRequest request) throws IOException {
-        String symbols = request.getParameter("symbols");
-        return tdaClient.getQuotes(symbols);
+    @RequestMapping(value = "content")
+    public ModelAndView getContent(HttpServletRequest request) throws IOException {
+        List<Quote> list = tdaClient.getQuotes("BA,PG");
+
+        ModelAndView model = new ModelAndView("content");
+        model.addObject("list", list);
+        model.addObject("symbols", "BA,PG");
+        return model;
     }
 
     @RequestMapping(value = "showSymbols")
