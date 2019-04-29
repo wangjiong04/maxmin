@@ -3,10 +3,13 @@ package com.maxmin.tda.clients;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxmin.tda.dto.Quote;
+import com.maxmin.tda.dto.Stock;
 import com.maxmin.tda.dto.Token;
+import com.maxmin.tda.dto.Transaction;
 import com.maxmin.tda.utils.ObjectMapperFactory;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,6 +30,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Data
@@ -36,6 +41,9 @@ public class TdaClient {
 
     @Value("${redirect_uri}")
     private String redirect_uri;
+
+    @Value("${accountId}")
+    private String accountId;
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
 
@@ -84,6 +92,29 @@ public class TdaClient {
             }
         }
         return list;
+    }
+
+    public List<Stock> getStocks() throws IOException {
+        String accessToken = getAccessToken();
+        if (StringUtils.isEmpty(accessToken)) {
+            return Collections.emptyList();
+        }
+        String tractionsUrl = String
+                .format("https://api.tdameritrade.com/v1/accounts/%s/transactions?type=TRADE", accountId);
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        HttpEntity entity = new HttpEntity<>(headers);
+        ResponseEntity<List<Transaction>> response = restTemplate
+                .exchange(tractionsUrl, HttpMethod.GET, entity, new ParameterizedTypeReference<List<Transaction>>() {
+                });
+        List<Transaction> list = response.getBody();
+        Map<String, Integer> stocks = list.stream().collect(
+                Collectors.groupingBy(transaction -> transaction.getTransactionItem().getInstrument().getSymbol(),
+                        Collectors.summingInt(tran -> tran.getTransactionItem().getAmount())
+                ));
+        return stocks.entrySet().stream().filter(x -> x.getValue() > 0).map(e -> new Stock(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
     }
 
     private void getTokenByRefreshToken(String refreshToken) {

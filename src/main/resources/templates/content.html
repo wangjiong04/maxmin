@@ -22,7 +22,17 @@
     </script>
 </head>
 <body>
-Symbols: <input type="text" id="txtSymbols" name="symbols" th:value="${symbols}" style="width:200px"/>
+<input hidden="hidden" type="text" id="txtSymbols" name="symbols" th:value="${symbols}" style="width:200px"/>
+<table border="1">
+    <tr>
+        <th>Symbol</th>
+        <th>Quantity</th>
+    </tr>
+    <tr th:each="stock,listStat : ${stocks}">
+        <td th:text="${stock.symbol}"></td>
+        <td th:text="${stock.quantity}"></td>
+    </tr>
+</table>
 <br/>
 <div id="result">
     <table border="1">
@@ -31,28 +41,26 @@ Symbols: <input type="text" id="txtSymbols" name="symbols" th:value="${symbols}"
             <th>Symbol</th>
             <th>Description</th>
             <th>LastPrice</th>
-            <th>LastSize</th>
             <th>OpenPrice</th>
             <th>highPrice</th>
             <th>lowPrice</th>
+            <th>askPrice</th>
+            <th>bidPrice</th>
             <th>closePrice</th>
-            <th>netChange</th>
             <th>totalVolume</th>
-            <th>exchangeName</th>
         </tr>
         <tr th:each="quote,listStat : ${list}">
-            <th th:text="${listStat.index}"></th>
+            <th th:text="${listStat.index}+1"></th>
             <td th:text="${quote.symbol}"></td>
             <td th:text="${quote.description}"></td>
             <th th:text="${quote.lastPrice}"></th>
-            <th th:text="${quote.lastSize}"></th>
             <th th:text="${quote.openPrice}"></th>
             <th th:text="${quote.highPrice}"></th>
             <th th:text="${quote.lowPrice}"></th>
+            <th th:text="${quote.askPrice}"></th>
+            <th th:text="${quote.bidPrice}"></th>
             <th th:text="${quote.closePrice}"></th>
-            <th th:text="${quote.netChange}"></th>
             <th th:text="${quote.totalVolume}"></th>
-            <th th:text="${quote.exchangeName}"></th>
         </tr>
     </table>
 </div>

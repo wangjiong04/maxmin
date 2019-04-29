@@ -94,4 +94,7 @@ public class Quote {
     @JsonProperty("delayed")
     public Boolean delayed;
 
+    public String getDescription() {
+        return description.split(" ")[0];
+    }
 }

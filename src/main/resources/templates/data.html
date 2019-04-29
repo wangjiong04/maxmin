@@ -5,36 +5,34 @@
     <title>Title</title>
 </head>
 <body>
-    <table border="1">
-        <tr>
-            <th>index</th>
-            <th>Symbol</th>
-            <th>Description</th>
-            <th>LastPrice</th>
-            <th>LastSize</th>
-            <th>OpenPrice</th>
-            <th>highPrice</th>
-            <th>lowPrice</th>
-            <th>closePrice</th>
-            <th>netChange</th>
-            <th>totalVolume</th>
-            <th>exchangeName</th>
-        </tr>
-        <tr th:each="quote,listStat : ${list}">
-            <th th:text="${listStat.index}"></th>
-            <td th:text="${quote.symbol}"></td>
-            <td th:text="${quote.description}"></td>
-            <th th:text="${quote.lastPrice}"></th>
-            <th th:text="${quote.lastSize}"></th>
-            <th th:text="${quote.openPrice}"></th>
-            <th th:text="${quote.highPrice}"></th>
-            <th th:text="${quote.lowPrice}"></th>
-            <th th:text="${quote.closePrice}"></th>
-            <th th:text="${quote.netChange}"></th>
-            <th th:text="${quote.totalVolume}"></th>
-            <th th:text="${quote.exchangeName}"></th>
-        </tr>
-    </table>
+<table border="1">
+    <tr>
+        <th>index</th>
+        <th>Symbol</th>
+        <th>Description</th>
+        <th>LastPrice</th>
+        <th>OpenPrice</th>
+        <th>highPrice</th>
+        <th>lowPrice</th>
+        <th>askPrice</th>
+        <th>bidPrice</th>
+        <th>closePrice</th>
+        <th>totalVolume</th>
+    </tr>
+    <tr th:each="quote,listStat : ${list}">
+        <th th:text="${listStat.index}"></th>
+        <td th:text="${quote.symbol}"></td>
+        <td th:text="${quote.description}"></td>
+        <th th:text="${quote.lastPrice}"></th>
+        <th th:text="${quote.openPrice}"></th>
+        <th th:text="${quote.highPrice}"></th>
+        <th th:text="${quote.lowPrice}"></th>
+        <th th:text="${quote.askPrice}"></th>
+        <th th:text="${quote.bidPrice}"></th>
+        <th th:text="${quote.closePrice}"></th>
+        <th th:text="${quote.totalVolume}"></th>
+    </tr>
+</table>
 </body>
 
 </html>

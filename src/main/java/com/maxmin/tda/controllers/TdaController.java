@@ -3,8 +3,8 @@ package com.maxmin.tda.controllers;
 import com.maxmin.tda.clients.TdaClient;
 import com.maxmin.tda.dto.Config;
 import com.maxmin.tda.dto.Quote;
+import com.maxmin.tda.dto.Stock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class TdaController {
@@ -37,9 +38,8 @@ public class TdaController {
     }
 
 
-
     @RequestMapping(value = "app/api/connect", method = {RequestMethod.GET, RequestMethod.POST})
-    public void  getCode(@RequestParam("code") String code,HttpServletResponse response) throws IOException {
+    public void getCode(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
 
         System.out.println("Authorization Code------" + code);
 
@@ -65,11 +65,13 @@ public class TdaController {
 
     @RequestMapping(value = "content")
     public ModelAndView getContent(HttpServletRequest request) throws IOException {
-        List<Quote> list = tdaClient.getQuotes("BA,PG");
-
+        List<Stock> stocks = tdaClient.getStocks();
+        String symbols = stocks.stream().map(Stock::getSymbol).collect(Collectors.joining(","));
+        List<Quote> list = tdaClient.getQuotes(symbols);
         ModelAndView model = new ModelAndView("content");
         model.addObject("list", list);
-        model.addObject("symbols", "BA,PG");
+        model.addObject("symbols", symbols);
+        model.addObject("stocks", stocks);
         return model;
     }
 
