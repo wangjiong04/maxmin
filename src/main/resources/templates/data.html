@@ -9,6 +9,7 @@
     <tr>
         <th>index</th>
         <th>Symbol</th>
+        <th>Quantity</th>
         <th>Description</th>
         <th>LastPrice</th>
         <th>OpenPrice</th>
@@ -18,10 +19,12 @@
         <th>bidPrice</th>
         <th>closePrice</th>
         <th>totalVolume</th>
+
     </tr>
     <tr th:each="quote,listStat : ${list}">
-        <th th:text="${listStat.index}"></th>
+        <th th:text="${listStat.index}+1"></th>
         <td th:text="${quote.symbol}"></td>
+        <td th:text="${quote.quantity}"></td>
         <td th:text="${quote.description}"></td>
         <th th:text="${quote.lastPrice}"></th>
         <th th:text="${quote.openPrice}"></th>

@@ -68,19 +68,19 @@ public class TdaClient {
         getTokenFromTda(true, code);
     }
 
-    public List<Quote> getQuotes(String symbols) throws IOException {
+    public List<Quote> getQuotes() throws IOException {
+        List<Stock> stocks = getStocks();
+        String symbols = stocks.stream().map(Stock::getSymbol).collect(Collectors.joining(","));
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyList();
         }
         String symbolURL = "https://api.tdameritrade.com/v1/marketdata/quotes?symbol=" + symbols;
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + accessToken);
-        HttpEntity entity = new HttpEntity<>(headers);
-        ResponseEntity<String> respponse = restTemplate
+        HttpEntity entity = getEntity(accessToken);
+        ResponseEntity<String> response = restTemplate
                 .exchange(symbolURL, HttpMethod.GET, entity, String.class);
-        JsonNode node = OBJECT_MAPPER.readTree(respponse.getBody());
+        JsonNode node = OBJECT_MAPPER.readTree(response.getBody());
         final Iterator<String> fieldNames = node.fieldNames();
         ArrayList<Quote> list = new ArrayList<>();
         while (fieldNames.hasNext()) {
@@ -94,20 +94,19 @@ public class TdaClient {
         return list;
     }
 
-    public List<Stock> getStocks() throws IOException {
+    private List<Stock> getStocks() {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyList();
         }
-        String tractionsUrl = String
+        String transactionsUrl = String
                 .format("https://api.tdameritrade.com/v1/accounts/%s/transactions?type=TRADE", accountId);
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + accessToken);
-        HttpEntity entity = new HttpEntity<>(headers);
+        HttpEntity entity = getEntity(accessToken);
         ResponseEntity<List<Transaction>> response = restTemplate
-                .exchange(tractionsUrl, HttpMethod.GET, entity, new ParameterizedTypeReference<List<Transaction>>() {
-                });
+                .exchange(transactionsUrl, HttpMethod.GET, entity,
+                        new ParameterizedTypeReference<List<Transaction>>() {
+                        });
         List<Transaction> list = response.getBody();
         Map<String, Integer> stocks = list.stream().collect(
                 Collectors.groupingBy(transaction -> transaction.getTransactionItem().getInstrument().getSymbol(),
@@ -115,6 +114,12 @@ public class TdaClient {
                 ));
         return stocks.entrySet().stream().filter(x -> x.getValue() > 0).map(e -> new Stock(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
+    }
+
+    private HttpEntity getEntity(String token) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + token);
+        return new HttpEntity<>(headers);
     }
 
     private void getTokenByRefreshToken(String refreshToken) {

@@ -3,96 +3,100 @@ package com.maxmin.tda.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.maxmin.tda.utils.Constant;
+import lombok.Data;
 
 import java.util.Date;
 
+@Data
 public class Quote {
     @JsonProperty("assetType")
-    public String assetType;
+    private String assetType;
     @JsonProperty("symbol")
-    public String symbol;
+    private String symbol;
     @JsonProperty("description")
-    public String description;
+    private String description;
     @JsonProperty("bidPrice")
-    public Double bidPrice;
+    private Double bidPrice;
     @JsonProperty("bidSize")
-    public Integer bidSize;
+    private Integer bidSize;
     @JsonProperty("bidId")
-    public String bidId;
+    private String bidId;
     @JsonProperty("askPrice")
-    public Double askPrice;
+    private Double askPrice;
     @JsonProperty("askSize")
-    public Integer askSize;
+    private Integer askSize;
     @JsonProperty("askId")
-    public String askId;
+    private String askId;
     @JsonProperty("lastPrice")
-    public Double lastPrice;
+    private Double lastPrice;
     @JsonProperty("lastSize")
-    public Integer lastSize;
+    private Integer lastSize;
     @JsonProperty("lastId")
-    public String lastId;
+    private String lastId;
     @JsonProperty("openPrice")
-    public Double openPrice;
+    private Double openPrice;
     @JsonProperty("highPrice")
-    public Double highPrice;
+    private Double highPrice;
     @JsonProperty("lowPrice")
-    public Double lowPrice;
+    private Double lowPrice;
     @JsonProperty("bidTick")
-    public String bidTick;
+    private String bidTick;
     @JsonProperty("closePrice")
-    public Double closePrice;
+    private Double closePrice;
     @JsonProperty("netChange")
-    public Double netChange;
+    private Double netChange;
     @JsonProperty("totalVolume")
-    public Integer totalVolume;
+    private Integer totalVolume;
     @JsonProperty("quoteTimeInLong")
     @JsonFormat(pattern = Constant.DATE_FORMAT)
-    public Date quoteTimeInLong;
+    private Date quoteTimeInLong;
     @JsonProperty("tradeTimeInLong")
     @JsonFormat(pattern = Constant.DATE_FORMAT)
-    public Date tradeTimeInLong;
+    private Date tradeTimeInLong;
     @JsonProperty("mark")
-    public Double mark;
+    private Double mark;
     @JsonProperty("exchange")
-    public String exchange;
+    private String exchange;
     @JsonProperty("exchangeName")
-    public String exchangeName;
+    private String exchangeName;
     @JsonProperty("marginable")
-    public Boolean marginable;
+    private Boolean marginable;
     @JsonProperty("shortable")
-    public Boolean shortable;
+    private Boolean shortable;
     @JsonProperty("volatility")
-    public Double volatility;
+    private Double volatility;
     @JsonProperty("digits")
-    public Integer digits;
+    private Integer digits;
     @JsonProperty("52WkHigh")
-    public Double _52WkHigh;
+    private Double _52WkHigh;
     @JsonProperty("52WkLow")
-    public Double _52WkLow;
+    private Double _52WkLow;
     @JsonProperty("nAV")
-    public Double nAV;
+    private Double nAV;
     @JsonProperty("peRatio")
-    public Double peRatio;
+    private Double peRatio;
     @JsonProperty("divAmount")
-    public Double divAmount;
+    private Double divAmount;
     @JsonProperty("divYield")
-    public Double divYield;
+    private Double divYield;
     @JsonProperty("divDate")
     @JsonFormat(pattern = Constant.DATE_FORMAT)
-    public Date divDate;
+    private Date divDate;
     @JsonProperty("securityStatus")
-    public String securityStatus;
+    private String securityStatus;
     @JsonProperty("regularMarketLastPrice")
-    public Double regularMarketLastPrice;
+    private Double regularMarketLastPrice;
     @JsonProperty("regularMarketLastSize")
-    public Integer regularMarketLastSize;
+    private Integer regularMarketLastSize;
     @JsonProperty("regularMarketNetChange")
-    public Double regularMarketNetChange;
+    private Double regularMarketNetChange;
     @JsonProperty("regularMarketTradeTimeInLong")
     @JsonFormat(pattern = Constant.DATE_FORMAT)
-    public Date regularMarketTradeTimeInLong;
+    private Date regularMarketTradeTimeInLong;
     @JsonProperty("delayed")
-    public Boolean delayed;
+    private Boolean delayed;
+
+    private int quantity;
 
     public String getDescription() {
         return description.split(" ")[0];

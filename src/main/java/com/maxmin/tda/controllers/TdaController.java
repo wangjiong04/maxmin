@@ -3,7 +3,6 @@ package com.maxmin.tda.controllers;
 import com.maxmin.tda.clients.TdaClient;
 import com.maxmin.tda.dto.Config;
 import com.maxmin.tda.dto.Quote;
-import com.maxmin.tda.dto.Stock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -22,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Controller
 public class TdaController {
@@ -52,12 +50,10 @@ public class TdaController {
     @RequestMapping(value = "getSymbols", method = RequestMethod.GET)
     public RedirectView getSymbols(HttpServletRequest request,
                                    RedirectAttributes redirectAttributes) throws IOException {
-        String symbols = request.getParameter("symbols");
-        List<Quote> list = tdaClient.getQuotes(symbols);
+        List<Quote> list = tdaClient.getQuotes();
         RedirectView redirectView = new RedirectView();
 
         redirectAttributes.addFlashAttribute("list", list);
-        redirectAttributes.addFlashAttribute("symbols", symbols);
         redirectView.setContextRelative(true);
         redirectView.setUrl("/showSymbols");
         return redirectView;
@@ -65,13 +61,9 @@ public class TdaController {
 
     @RequestMapping(value = "content")
     public ModelAndView getContent(HttpServletRequest request) throws IOException {
-        List<Stock> stocks = tdaClient.getStocks();
-        String symbols = stocks.stream().map(Stock::getSymbol).collect(Collectors.joining(","));
-        List<Quote> list = tdaClient.getQuotes(symbols);
+        List<Quote> list = tdaClient.getQuotes();
         ModelAndView model = new ModelAndView("content");
         model.addObject("list", list);
-        model.addObject("symbols", symbols);
-        model.addObject("stocks", stocks);
         return model;
     }
 
@@ -79,10 +71,8 @@ public class TdaController {
     public ModelAndView showSymbols(HttpServletRequest request) {
         Map<String, ?> flashMap = RequestContextUtils.getInputFlashMap(request);
         List<Quote> list = (List<Quote>) flashMap.get("list");
-        String symbols = (String) flashMap.get("symbols");
         ModelAndView model = new ModelAndView("data");
         model.addObject("list", list);
-        model.addObject("symbols", symbols);
         return model;
     }
 
