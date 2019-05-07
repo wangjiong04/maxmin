@@ -9,6 +9,7 @@ import com.maxmin.tda.dto.Transaction;
 import com.maxmin.tda.utils.ObjectMapperFactory;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -97,7 +98,8 @@ public class TdaClient {
         return list;
     }
 
-    private Map<String,Integer> getStocks() {
+    @Cacheable("stocks")
+    public Map<String,Integer> getStocks() {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyMap();
