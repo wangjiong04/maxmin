@@ -37,7 +37,8 @@
             <th>bidPrice</th>
             <th>closePrice</th>
             <th>totalVolume</th>
-
+            <th>Qty</th>
+            <th>-Qty</th>
         </tr>
         <tr th:each="quote,listStat : ${list}">
             <th th:text="${listStat.index}+1"></th>
@@ -52,6 +53,8 @@
             <th th:text="${quote.bidPrice}"></th>
             <th th:text="${quote.closePrice}"></th>
             <th th:text="${quote.totalVolume}"></th>
+            <th></th>
+            <th></th>
         </tr>
     </table>
 </div>

@@ -70,8 +70,8 @@ public class TdaClient {
     }
 
     public List<Quote> getQuotes() throws IOException {
-        List<Stock> stocks = getStocks();
-        String symbols = stocks.stream().map(Stock::getSymbol).collect(Collectors.joining(","));
+        Map<String,Integer> stocks = getStocks();
+        String symbols = stocks.keySet().stream().collect(Collectors.joining(","));
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyList();
@@ -89,6 +89,9 @@ public class TdaClient {
             final JsonNode fieldValue = node.get(fieldName);
             if (fieldValue.isObject()) {
                 Quote quote = OBJECT_MAPPER.readValue(fieldValue.toString(), Quote.class);
+                if (stocks.containsKey(quote.getSymbol())){
+                    quote.setQuantity(stocks.get(quote.getSymbol()));
+                }
                 list.add(quote);
             }
         }
@@ -96,10 +99,10 @@ public class TdaClient {
     }
 
     @Cacheable("stocks")
-    public List<Stock> getStocks() {
+    public Map<String,Integer> getStocks() {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
         String transactionsUrl = String
                 .format("https://api.tdameritrade.com/v1/accounts/%s/transactions?type=TRADE", accountId);
@@ -114,8 +117,11 @@ public class TdaClient {
                 Collectors.groupingBy(transaction -> transaction.getTransactionItem().getInstrument().getSymbol(),
                         Collectors.summingInt(tran -> tran.getTransactionItem().getAmount())
                 ));
+        return stocks.entrySet().stream().filter(x->x.getValue()>0).collect(Collectors.toMap(x->x.getKey(), x -> x.getValue()));
+        /*
         return stocks.entrySet().stream().filter(x -> x.getValue() > 0).map(e -> new Stock(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
+                */
     }
 
     @Cacheable("stocks")
