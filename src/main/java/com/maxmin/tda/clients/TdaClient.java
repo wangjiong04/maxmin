@@ -118,6 +118,29 @@ public class TdaClient {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable("stocks")
+    public List<Stock> getStocks1() {
+        String accessToken = getAccessToken();
+        if (StringUtils.isEmpty(accessToken)) {
+            return Collections.emptyList();
+        }
+        String transactionsUrl = String
+                .format("https://api.tdameritrade.com/v1/accounts/%s/transactions?type=TRADE", accountId);
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity entity = getEntity(accessToken);
+        ResponseEntity<List<Transaction>> response = restTemplate
+                .exchange(transactionsUrl, HttpMethod.GET, entity,
+                        new ParameterizedTypeReference<List<Transaction>>() {
+                        });
+        List<Transaction> list = response.getBody();
+        Map<String, Integer> stocks = list.stream().collect(
+                Collectors.groupingBy(transaction -> transaction.getTransactionItem().getInstrument().getSymbol(),
+                        Collectors.summingInt(tran -> tran.getTransactionItem().getAmount())
+                ));
+        return stocks.entrySet().stream().filter(x -> x.getValue() > 0).map(e -> new Stock(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
+    }
+
     private HttpEntity getEntity(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token);
