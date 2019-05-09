@@ -6,9 +6,11 @@ import lombok.Data;
 @Data
 public class Instrument {
     @JsonProperty("symbol")
-    public String symbol;
+    private String symbol;
     @JsonProperty("cusip")
-    public String cusip;
+    private String cusip;
     @JsonProperty("assetType")
-    public String assetType;
+    private String assetType;
+    @JsonProperty("description")
+    private String description;
 }

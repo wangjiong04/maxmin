@@ -2,10 +2,9 @@ package com.maxmin.tda.clients;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.maxmin.tda.dto.Account;
 import com.maxmin.tda.dto.Quote;
-import com.maxmin.tda.dto.Stock;
 import com.maxmin.tda.dto.Token;
-import com.maxmin.tda.dto.Transaction;
 import com.maxmin.tda.utils.ObjectMapperFactory;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,7 +69,7 @@ public class TdaClient {
     }
 
     public List<Quote> getQuotes() throws IOException {
-        Map<String,Integer> stocks = getStocks();
+        Map<String, Long> stocks = getStocks();
         String symbols = stocks.keySet().stream().collect(Collectors.joining(","));
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
@@ -89,7 +88,7 @@ public class TdaClient {
             final JsonNode fieldValue = node.get(fieldName);
             if (fieldValue.isObject()) {
                 Quote quote = OBJECT_MAPPER.readValue(fieldValue.toString(), Quote.class);
-                if (stocks.containsKey(quote.getSymbol())){
+                if (stocks.containsKey(quote.getSymbol())) {
                     quote.setQuantity(stocks.get(quote.getSymbol()));
                 }
                 list.add(quote);
@@ -98,53 +97,25 @@ public class TdaClient {
         return list;
     }
 
+
     @Cacheable("stocks")
-    public Map<String,Integer> getStocks() {
+    public Map<String, Long> getStocks() {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyMap();
         }
-        String transactionsUrl = String
-                .format("https://api.tdameritrade.com/v1/accounts/%s/transactions?type=TRADE", accountId);
+        String transactionsUrl = "https://api.tdameritrade.com/v1/accounts?fields=positions";
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity entity = getEntity(accessToken);
-        ResponseEntity<List<Transaction>> response = restTemplate
+        ResponseEntity<List<Account>> response = restTemplate
                 .exchange(transactionsUrl, HttpMethod.GET, entity,
-                        new ParameterizedTypeReference<List<Transaction>>() {
+                        new ParameterizedTypeReference<List<Account>>() {
                         });
-        List<Transaction> list = response.getBody();
-        Map<String, Integer> stocks = list.stream().collect(
-                Collectors.groupingBy(transaction -> transaction.getTransactionItem().getInstrument().getSymbol(),
-                        Collectors.summingInt(tran -> tran.getTransactionItem().getAmount())
-                ));
-        return stocks.entrySet().stream().filter(x->x.getValue()>0).collect(Collectors.toMap(x->x.getKey(), x -> x.getValue()));
-        /*
-        return stocks.entrySet().stream().filter(x -> x.getValue() > 0).map(e -> new Stock(e.getKey(), e.getValue()))
-                .collect(Collectors.toList());
-                */
-    }
-
-    @Cacheable("stocks")
-    public List<Stock> getStocks1() {
-        String accessToken = getAccessToken();
-        if (StringUtils.isEmpty(accessToken)) {
-            return Collections.emptyList();
-        }
-        String transactionsUrl = String
-                .format("https://api.tdameritrade.com/v1/accounts/%s/transactions?type=TRADE", accountId);
-        RestTemplate restTemplate = new RestTemplate();
-        HttpEntity entity = getEntity(accessToken);
-        ResponseEntity<List<Transaction>> response = restTemplate
-                .exchange(transactionsUrl, HttpMethod.GET, entity,
-                        new ParameterizedTypeReference<List<Transaction>>() {
-                        });
-        List<Transaction> list = response.getBody();
-        Map<String, Integer> stocks = list.stream().collect(
-                Collectors.groupingBy(transaction -> transaction.getTransactionItem().getInstrument().getSymbol(),
-                        Collectors.summingInt(tran -> tran.getTransactionItem().getAmount())
-                ));
-        return stocks.entrySet().stream().filter(x -> x.getValue() > 0).map(e -> new Stock(e.getKey(), e.getValue()))
-                .collect(Collectors.toList());
+        List<Account> list = response.getBody();
+        return list.stream()
+                .flatMap(account -> account.getSecuritiesAccount().getPositions().stream())
+                .filter(position -> "EQUITY".equals(position.getInstrument().getAssetType()))
+                .collect(Collectors.toMap(p -> p.getInstrument().getSymbol(), p -> p.getLongQuantity()));
     }
 
     private HttpEntity getEntity(String token) {
