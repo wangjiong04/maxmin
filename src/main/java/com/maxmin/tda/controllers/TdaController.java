@@ -19,6 +19,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -52,8 +53,9 @@ public class TdaController {
                                    RedirectAttributes redirectAttributes) throws IOException {
         List<Quote> list = tdaClient.getQuotes();
         RedirectView redirectView = new RedirectView();
-
+        String selectedSymbol = request.getParameter("selectedSymbol");
         redirectAttributes.addFlashAttribute("list", list);
+        redirectAttributes.addFlashAttribute("selectedSymbol", selectedSymbol);
         redirectView.setContextRelative(true);
         redirectView.setUrl("/showSymbols");
         return redirectView;
@@ -71,8 +73,11 @@ public class TdaController {
     public ModelAndView showSymbols(HttpServletRequest request) {
         Map<String, ?> flashMap = RequestContextUtils.getInputFlashMap(request);
         List<Quote> list = (List<Quote>) flashMap.get("list");
+        String selectedSymbol = (String) flashMap.get("selectedSymbol");
         ModelAndView model = new ModelAndView("data");
         model.addObject("list", list);
+
+        model.addObject("selectedSymbol", Arrays.asList(selectedSymbol.split(",")));
         return model;
     }
 

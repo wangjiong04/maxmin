@@ -24,9 +24,13 @@
     </tr>
     <tr th:each="quote,listStat : ${list}">
         <th th:text="${listStat.index}+1"></th>
-        <td th:text="${quote.symbol}"></td>
-        <td th:text="${quote.quantity}"></td>
-        <td th:text="${quote.description}"></td>
+        <th><input type="checkbox" name="selectedBox" id="selectedBox"
+                   th:attr="checked=${selectedSymbol.contains(quote.symbol)?true:false}"
+                   th:value="${quote.symbol}"
+                   th:text="${quote.symbol}"/>
+        </th>
+        <th th:text="${quote.quantity}"></th>
+        <th th:text="${quote.description}"></th>
         <th th:text="${quote.lastPrice}"></th>
         <th th:text="${quote.openPrice}"></th>
         <th th:text="${quote.highPrice}"></th>

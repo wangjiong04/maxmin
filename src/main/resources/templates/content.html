@@ -7,9 +7,14 @@
     <script type="text/javascript">
         $(function () {
             window.setInterval(function () {
+                var favorite = [];
+                $.each($("input[name='selectedBox']:checked"), function () {
+                    favorite.push($(this).val());
+                });
                 $.ajax({
                     type: "GET",
                     url: "/getSymbols",
+                    data: {selectedSymbol: favorite.join(",")},
                     success: function (data) {
                         $("#result").empty().append(data);
                     }
@@ -20,7 +25,14 @@
     </script>
 </head>
 <body>
-
+<table>
+    <tr>
+        <td>
+            <input type="button" value="Buy All" id="btnBuy"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Sell All" id="btnSell"/>&nbsp;&nbsp;&nbsp;&nbsp;
+        </td>
+    </tr>
+</table>
 <br/>
 <div id="result">
     <table border="1">
@@ -42,9 +54,11 @@
         </tr>
         <tr th:each="quote,listStat : ${list}">
             <th th:text="${listStat.index}+1"></th>
-            <td th:text="${quote.symbol}"></td>
-            <td th:text="${quote.quantity}"></td>
-            <td th:text="${quote.description}"></td>
+            <th><input type="checkbox" name="selectedBox" id="selectedBox"
+                       th:value="${quote.symbol}"
+                       th:text="${quote.symbol}"/></th>
+            <th th:text="${quote.quantity}"></th>
+            <th th:text="${quote.description}"></th>
             <th th:text="${quote.lastPrice}"></th>
             <th th:text="${quote.openPrice}"></th>
             <th th:text="${quote.highPrice}"></th>

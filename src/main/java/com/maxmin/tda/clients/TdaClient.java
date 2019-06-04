@@ -1,5 +1,6 @@
 package com.maxmin.tda.clients;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxmin.tda.dto.Account;
@@ -45,7 +46,8 @@ public class TdaClient {
     @Value("${accountId}")
     private String accountId;
 
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     private Token token;
 
@@ -69,6 +71,7 @@ public class TdaClient {
     }
 
     public List<Quote> getQuotes() throws IOException {
+
         Map<String, Long> stocks = getStocks();
         String symbols = stocks.keySet().stream().collect(Collectors.joining(","));
         String accessToken = getAccessToken();
