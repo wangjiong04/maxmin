@@ -88,5 +88,17 @@ public class TdaController {
         return new ModelAndView("default");
     }
 
+    @PostMapping(value = "/buy")
+    public void buy(HttpServletRequest request) {
+        String selectedSymbol = request.getParameter("selectedSymbol");
+        String strQuantity = request.getParameter("quantity");
+        int quantity = Integer.parseInt(strQuantity);
+    }
 
+    @PostMapping(value = "/sell")
+    public void sell(HttpServletRequest request) {
+        String selectedSymbol = request.getParameter("selectedSymbol");
+        String strQuantity = request.getParameter("quantity");
+        int quantity = Integer.parseInt(strQuantity);
+    }
 }

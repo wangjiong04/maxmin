@@ -22,14 +22,79 @@
                 ;
             }, 5 * 1000);
         });
+
+        function selectAll() {
+            $.each($("input[name='selectedBox']"), function () {
+                if ($("input[name='selectedAll']").attr('checked')) {
+                    $(this).attr('checked', false);
+                } else {
+                    $(this).attr('checked', true);
+                }
+
+            });
+            if ($("input[name='selectedAll']").attr('checked')) {
+                $("input[name='selectedAll']").attr('checked', false);
+            } else {
+                $("input[name='selectedAll']").attr('checked', true);
+            }
+        }
+
+        function buy() {
+            var favorite = [];
+            $.each($("input[name='selectedBox']:checked"), function () {
+                favorite.push($(this).val());
+            });
+            $.ajax({
+                type: "POST",
+                url: "/buy",
+                data: {
+                    selectedSymbol: favorite.join(","),
+                    quantity: $("#txtQuantity").val()
+                },
+                success: function (data) {
+                    $("#result").empty().append(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.responseText);
+                }
+            })
+            ;
+        }
+
+        function sell() {
+            var favorite = [];
+            $.each($("input[name='selectedBox']:checked"), function () {
+                favorite.push($(this).val());
+            });
+            $.ajax({
+                type: "POST",
+                url: "/sell",
+                data: {
+                    selectedSymbol: favorite.join(","),
+                    quantity: $("#txtQuantity").val()
+                },
+                success: function (data) {
+                    $("#result").empty().append(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.responseText);
+                }
+            })
+            ;
+        }
     </script>
 </head>
 <body>
 <table>
     <tr>
         <td>
-            <input type="button" value="Buy All" id="btnBuy"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="button" value="Sell All" id="btnSell"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="selectedAll" id="selectedAll" hidden="hidden"/>
+            <input type="button" value="Select/Deselect All" id="btnSelect" th:onclick="'selectAll();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Sell All" id="btnSellAll"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Sell with Quantity" id="btnSell" th:onclick="'sell();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Buy with Quantity" id="btnBuy" th:onclick="'buy();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <label>Quantity</label>
+            <input type="text" id="txtQuantity"/>
         </td>
     </tr>
 </table>

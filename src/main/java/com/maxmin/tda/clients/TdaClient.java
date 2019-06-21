@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxmin.tda.dto.Account;
 import com.maxmin.tda.dto.Quote;
 import com.maxmin.tda.dto.Token;
+import com.maxmin.tda.dto.TradeType;
 import com.maxmin.tda.utils.ObjectMapperFactory;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,9 +72,57 @@ public class TdaClient {
     }
 
     public List<Quote> getQuotes() throws IOException {
-
         Map<String, Long> stocks = getStocks();
         String symbols = stocks.keySet().stream().collect(Collectors.joining(","));
+
+        List<Quote> quotes = getQuoteBySymbols(symbols);
+        for (Quote quote : quotes
+        ) {
+            if (stocks.containsKey(quote.getSymbol())) {
+                quote.setQuantity(stocks.get(quote.getSymbol()));
+            }
+        }
+        return quotes;
+    }
+
+    public void stockTrade(String symbols, int quantity, TradeType tradeType) throws IOException {
+        List<Quote> list = getQuoteBySymbols(symbols);
+        for (Quote quote : list
+        ) {
+            quote.getHighPrice();
+        }
+    }
+
+    public Map<String, Long> getStocks() {
+        String accessToken = getAccessToken();
+        if (StringUtils.isEmpty(accessToken)) {
+            return Collections.emptyMap();
+        }
+        List<Account> list = getAccounts();
+        return list.stream()
+                .flatMap(account -> account.getSecuritiesAccount().getPositions().stream())
+                .filter(position -> "EQUITY".equals(position.getInstrument().getAssetType()))
+                .collect(Collectors.toMap(p -> p.getInstrument().getSymbol(), p -> p.getLongQuantity()));
+    }
+
+    @Cacheable("accounts")
+    public List<Account> getAccounts() {
+        String accessToken = getAccessToken();
+        if (StringUtils.isEmpty(accessToken)) {
+            return Collections.emptyList();
+        }
+        String transactionsUrl = "https://api.tdameritrade.com/v1/accounts?fields=positions";
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity entity = getEntity(accessToken);
+        ResponseEntity<List<Account>> response = restTemplate
+                .exchange(transactionsUrl, HttpMethod.GET, entity,
+                        new ParameterizedTypeReference<List<Account>>() {
+                        });
+        return response.getBody();
+    }
+
+
+    private List<Quote> getQuoteBySymbols(String symbols) throws IOException {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyList();
@@ -91,34 +140,11 @@ public class TdaClient {
             final JsonNode fieldValue = node.get(fieldName);
             if (fieldValue.isObject()) {
                 Quote quote = OBJECT_MAPPER.readValue(fieldValue.toString(), Quote.class);
-                if (stocks.containsKey(quote.getSymbol())) {
-                    quote.setQuantity(stocks.get(quote.getSymbol()));
-                }
+
                 list.add(quote);
             }
         }
         return list;
-    }
-
-
-    @Cacheable("stocks")
-    public Map<String, Long> getStocks() {
-        String accessToken = getAccessToken();
-        if (StringUtils.isEmpty(accessToken)) {
-            return Collections.emptyMap();
-        }
-        String transactionsUrl = "https://api.tdameritrade.com/v1/accounts?fields=positions";
-        RestTemplate restTemplate = new RestTemplate();
-        HttpEntity entity = getEntity(accessToken);
-        ResponseEntity<List<Account>> response = restTemplate
-                .exchange(transactionsUrl, HttpMethod.GET, entity,
-                        new ParameterizedTypeReference<List<Account>>() {
-                        });
-        List<Account> list = response.getBody();
-        return list.stream()
-                .flatMap(account -> account.getSecuritiesAccount().getPositions().stream())
-                .filter(position -> "EQUITY".equals(position.getInstrument().getAssetType()))
-                .collect(Collectors.toMap(p -> p.getInstrument().getSymbol(), p -> p.getLongQuantity()));
     }
 
     private HttpEntity getEntity(String token) {
