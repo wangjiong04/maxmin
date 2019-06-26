@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>result</title>
+</head>
+<body>
+Trade Result:<br/>
+<table border="1">
+    <tr>
+        <th>Symbol</th>
+        <th>Quantity</th>
+        <th>Status</th>
+        <th>Message</th>
+    </tr>
+    <tr th:each="result : ${traderesult}">
+        <th th:text="${result.symbol}"></th>
+        <th th:text="${result.quantity}"></th>
+        <th th:text="${result.status}"></th>
+        <th th:text="${result.message}"></th>
+    </tr>
+</table>
+</body>
+</html>

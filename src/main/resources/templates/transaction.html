@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>result</title>
+</head>
+<body>
+Transactions:<br/>
+<table border="1">
+    <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Symbol</th>
+        <th>Quantity</th>
+        <th>Price</th>
+    </tr>
+    <tr th:each="result : ${transactionList}">
+        <th th:text="${result.transactionDate}"></th>
+        <th th:text="${result.transactionItem.instruction}"></th>
+        <th th:text="${result.transactionItem.instrument.symbol}"></th>
+        <th th:text="${result.transactionItem.amount}"></th>
+        <th th:text="${result.transactionItem.price}"></th>
+    </tr>
+</table>
+</body>
+</html>

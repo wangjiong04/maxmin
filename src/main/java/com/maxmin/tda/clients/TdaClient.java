@@ -4,9 +4,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxmin.tda.dto.Account;
+import com.maxmin.tda.dto.OrderLeg;
 import com.maxmin.tda.dto.Quote;
 import com.maxmin.tda.dto.Token;
+import com.maxmin.tda.dto.TradeRequest;
+import com.maxmin.tda.dto.TradeResponse;
 import com.maxmin.tda.dto.TradeType;
+import com.maxmin.tda.dto.Transaction;
 import com.maxmin.tda.utils.ObjectMapperFactory;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,15 +89,54 @@ public class TdaClient {
         return quotes;
     }
 
-    public void stockTrade(String symbols, int quantity, TradeType tradeType) throws IOException {
+    public List<TradeResponse> stockTrade(String symbols, int quantity, TradeType tradeType) throws IOException {
+        String accessToken = getAccessToken();
+        if (StringUtils.isEmpty(accessToken)) {
+            return Collections.emptyList();
+        }
         List<Quote> list = getQuoteBySymbols(symbols);
+        //List<Account> accounts = getAccounts();
+        //String accountId = accounts.get(0).getSecuritiesAccount().getAccountId();
+        String transactionsUrl = "https://api.tdameritrade.com/v1/accounts/" + accountId + "/orders";
+        HttpHeaders headers = getHeader(accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        List<TradeResponse> responseList = new ArrayList<>();
         for (Quote quote : list
         ) {
-            quote.getHighPrice();
+            RestTemplate restTemplate = new RestTemplate();
+            TradeRequest tradeRequest = new TradeRequest();
+            OrderLeg orderLeg = new OrderLeg(quote.getSymbol(), tradeType.name(), quantity);
+            tradeRequest.getOrderLegCollection().add(orderLeg);
+            HttpEntity entity = new HttpEntity<>(tradeRequest, headers);
+            ResponseEntity<String> response = restTemplate
+                    .exchange(transactionsUrl, HttpMethod.POST, entity, String.class);
+            responseList.add(new TradeResponse(quote.getSymbol(), quantity, response.getStatusCode().name(),
+                    response.getBody()));
+            //quote.getHighPrice();
         }
+        return responseList;
     }
 
-    public Map<String, Long> getStocks() {
+    public List<Transaction> getTransaction(String startDate) {
+        String accessToken = getAccessToken();
+        if (StringUtils.isEmpty(accessToken)) {
+            return Collections.emptyList();
+        }
+        String transactionsUrl = String
+                .format("https://api.tdameritrade.com/v1/accounts/%s/transactions?type=TRADE&startDate=%s", accountId,
+                        startDate);
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity entity = getEntity(accessToken);
+        ResponseEntity<List<Transaction>> response = restTemplate
+                .exchange(transactionsUrl, HttpMethod.GET, entity,
+                        new ParameterizedTypeReference<List<Transaction>>() {
+                        });
+        List<Transaction> list = response.getBody();
+        return list;
+
+    }
+
+    private Map<String, Long> getStocks() {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyMap();
@@ -114,6 +157,7 @@ public class TdaClient {
         String transactionsUrl = "https://api.tdameritrade.com/v1/accounts?fields=positions";
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity entity = getEntity(accessToken);
+
         ResponseEntity<List<Account>> response = restTemplate
                 .exchange(transactionsUrl, HttpMethod.GET, entity,
                         new ParameterizedTypeReference<List<Account>>() {
@@ -151,6 +195,12 @@ public class TdaClient {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token);
         return new HttpEntity<>(headers);
+    }
+
+    private HttpHeaders getHeader(String token) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + token);
+        return headers;
     }
 
     private void getTokenByRefreshToken(String refreshToken) {

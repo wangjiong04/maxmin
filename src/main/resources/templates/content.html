@@ -52,7 +52,7 @@
                     quantity: $("#txtQuantity").val()
                 },
                 success: function (data) {
-                    $("#result").empty().append(data);
+                    $("#traderesult").empty().append(data);
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     alert(XMLHttpRequest.responseText);
@@ -74,7 +74,24 @@
                     quantity: $("#txtQuantity").val()
                 },
                 success: function (data) {
-                    $("#result").empty().append(data);
+                    $("#traderesult").empty().append(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.responseText);
+                }
+            })
+            ;
+        }
+
+        function getTransaction() {
+            $.ajax({
+                type: "GET",
+                url: "/getTransaction",
+                data: {
+                    startDate: "2019-06-21"
+                },
+                success: function (data) {
+                    $("#transactionResult").empty().append(data);
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     alert(XMLHttpRequest.responseText);
@@ -94,7 +111,8 @@
             <input type="button" value="Sell with Quantity" id="btnSell" th:onclick="'sell();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" value="Buy with Quantity" id="btnBuy" th:onclick="'buy();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <label>Quantity</label>
-            <input type="text" id="txtQuantity"/>
+            <input type="text" id="txtQuantity"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Show Transaction" id="btnTransaction" th:onclick="'getTransaction();'"/>
         </td>
     </tr>
 </table>
@@ -137,7 +155,12 @@
         </tr>
     </table>
 </div>
+<div id="traderesult">
 
+</div>
+<div id="transactionResult">
+
+</div>
 </body>
 
 </html>

@@ -3,6 +3,9 @@ package com.maxmin.tda.controllers;
 import com.maxmin.tda.clients.TdaClient;
 import com.maxmin.tda.dto.Config;
 import com.maxmin.tda.dto.Quote;
+import com.maxmin.tda.dto.TradeResponse;
+import com.maxmin.tda.dto.TradeType;
+import com.maxmin.tda.dto.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -81,6 +84,15 @@ public class TdaController {
         return model;
     }
 
+    @GetMapping(value = "getTransaction")
+    public ModelAndView getTransaction(HttpServletRequest request) {
+        String startDate = request.getParameter("startDate");
+        ModelAndView model = new ModelAndView("transaction");
+        List<Transaction> list = tdaClient.getTransaction(startDate);
+        model.addObject("transactionList", list);
+        return model;
+    }
+
     @GetMapping(value = "/")
     public ModelAndView defaultPage(ModelMap modelMap) {
         Config config = new Config(tdaClient.getClient_id(), tdaClient.getRedirect_uri());
@@ -89,16 +101,22 @@ public class TdaController {
     }
 
     @PostMapping(value = "/buy")
-    public void buy(HttpServletRequest request) {
-        String selectedSymbol = request.getParameter("selectedSymbol");
-        String strQuantity = request.getParameter("quantity");
-        int quantity = Integer.parseInt(strQuantity);
+    public ModelAndView buy(HttpServletRequest request) throws IOException {
+        return trade(request, TradeType.BUY);
     }
 
     @PostMapping(value = "/sell")
-    public void sell(HttpServletRequest request) {
+    public ModelAndView sell(HttpServletRequest request) throws IOException {
+        return trade(request, TradeType.SELL);
+    }
+
+    private ModelAndView trade(HttpServletRequest request, TradeType tradeType) throws IOException {
         String selectedSymbol = request.getParameter("selectedSymbol");
         String strQuantity = request.getParameter("quantity");
         int quantity = Integer.parseInt(strQuantity);
+        List<TradeResponse> result = tdaClient.stockTrade(selectedSymbol, quantity, tradeType);
+        ModelAndView model = new ModelAndView("traderesult");
+        model.addObject("traderesult", result);
+        return model;
     }
 }
