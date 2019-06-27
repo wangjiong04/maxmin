@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>result</title>
+</head>
+<body>
+<br/>
+Orders:<br/>
+<table border="1">
+    <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Symbol</th>
+        <th>Quantity</th>
+        <th>Status</th>
+    </tr>
+    <tr th:each="result : ${orderList}">
+        <th th:text="${result.enteredTime}"></th>
+        <th th:text="${result.orderLegCollection[0].instruction}"></th>
+        <th th:text="${result.orderLegCollection[0].instrument.symbol}"></th>
+        <th th:text="${result.orderLegCollection[0].quantity}"></th>
+        <th th:text="${result.status}"></th>
+    </tr>
+</table>
+</body>
+</html>

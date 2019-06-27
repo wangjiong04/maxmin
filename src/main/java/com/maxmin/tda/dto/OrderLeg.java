@@ -1,8 +1,10 @@
 package com.maxmin.tda.dto;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class OrderLeg {
     private String instruction;
     private int quantity;

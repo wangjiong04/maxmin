@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxmin.tda.dto.Account;
+import com.maxmin.tda.dto.Order;
 import com.maxmin.tda.dto.OrderLeg;
 import com.maxmin.tda.dto.Quote;
 import com.maxmin.tda.dto.Token;
@@ -30,8 +31,10 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -117,22 +120,40 @@ public class TdaClient {
         return responseList;
     }
 
-    public List<Transaction> getTransaction(String startDate) {
+    public List<Transaction> getTransaction() {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyList();
         }
         String transactionsUrl = String
                 .format("https://api.tdameritrade.com/v1/accounts/%s/transactions?type=TRADE&startDate=%s", accountId,
-                        startDate);
+                        getOneWeekBefore());
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity entity = getEntity(accessToken);
         ResponseEntity<List<Transaction>> response = restTemplate
                 .exchange(transactionsUrl, HttpMethod.GET, entity,
                         new ParameterizedTypeReference<List<Transaction>>() {
                         });
-        List<Transaction> list = response.getBody();
-        return list;
+        return response.getBody();
+
+    }
+
+    public List<Order> getOrders() {
+        String accessToken = getAccessToken();
+        if (StringUtils.isEmpty(accessToken)) {
+            return Collections.emptyList();
+        }
+        String transactionsUrl = String
+                .format("https://api.tdameritrade.com/v1/accounts/%s/orders?fromEnteredTime=%s&toEnteredTime=%s",
+                        accountId, getOneWeekBefore(), getCurrentDate());
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity entity = getEntity(accessToken);
+        ResponseEntity<List<Order>> response = restTemplate
+                .exchange(transactionsUrl, HttpMethod.GET, entity,
+                        new ParameterizedTypeReference<List<Order>>() {
+                        });
+        return response.getBody();
+
 
     }
 
@@ -201,6 +222,20 @@ public class TdaClient {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token);
         return headers;
+    }
+
+    private String getCurrentDate() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return dateFormat.format(Date.from(Instant.now()));
+    }
+
+    private String getOneWeekBefore() {
+        Calendar c = Calendar.getInstance();
+        c.setTime(new Date());
+        c.add(Calendar.DATE, -7);
+        Date d = c.getTime();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return dateFormat.format(d);
     }
 
     private void getTokenByRefreshToken(String refreshToken) {

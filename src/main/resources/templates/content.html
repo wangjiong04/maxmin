@@ -86,12 +86,29 @@
         function getTransaction() {
             $.ajax({
                 type: "GET",
-                url: "/getTransaction",
+                url: "/transactions",
                 data: {
                     startDate: "2019-06-21"
                 },
                 success: function (data) {
                     $("#transactionResult").empty().append(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.responseText);
+                }
+            })
+            ;
+        }
+
+        function getOrders() {
+            $.ajax({
+                type: "GET",
+                url: "/orders",
+                data: {
+                    startDate: "2019-06-21"
+                },
+                success: function (data) {
+                    $("#orders").empty().append(data);
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     alert(XMLHttpRequest.responseText);
@@ -112,7 +129,8 @@
             <input type="button" value="Buy with Quantity" id="btnBuy" th:onclick="'buy();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <label>Quantity</label>
             <input type="text" id="txtQuantity" value="1"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="button" value="Show Transaction" id="btnTransaction" th:onclick="'getTransaction();'"/>
+            <input type="button" value="Show Transaction" id="btnTransactions" th:onclick="'getTransaction();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Show Orders" id="btnOrders" th:onclick="'getOrders();'"/>
         </td>
     </tr>
 </table>
@@ -159,6 +177,9 @@
 
 </div>
 <div id="transactionResult">
+
+</div>
+<div id="orders">
 
 </div>
 </body>

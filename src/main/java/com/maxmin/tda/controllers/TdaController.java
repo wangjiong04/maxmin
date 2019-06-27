@@ -2,6 +2,7 @@ package com.maxmin.tda.controllers;
 
 import com.maxmin.tda.clients.TdaClient;
 import com.maxmin.tda.dto.Config;
+import com.maxmin.tda.dto.Order;
 import com.maxmin.tda.dto.Quote;
 import com.maxmin.tda.dto.TradeResponse;
 import com.maxmin.tda.dto.TradeType;
@@ -84,12 +85,21 @@ public class TdaController {
         return model;
     }
 
-    @GetMapping(value = "getTransaction")
+    @GetMapping(value = "transactions")
     public ModelAndView getTransaction(HttpServletRequest request) {
         String startDate = request.getParameter("startDate");
         ModelAndView model = new ModelAndView("transaction");
-        List<Transaction> list = tdaClient.getTransaction(startDate);
+        List<Transaction> list = tdaClient.getTransaction();
         model.addObject("transactionList", list);
+        return model;
+    }
+
+    @GetMapping(value = "orders")
+    public ModelAndView getOrders(HttpServletRequest request) {
+        String startDate = request.getParameter("startDate");
+        ModelAndView model = new ModelAndView("orders");
+        List<Order> list = tdaClient.getOrders();
+        model.addObject("orderList", list);
         return model;
     }
 
