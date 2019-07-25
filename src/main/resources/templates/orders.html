@@ -14,6 +14,7 @@ Orders:<br/>
         <th>Symbol</th>
         <th>Quantity</th>
         <th>Status</th>
+        <th>Price</th>
     </tr>
     <tr th:each="result : ${orderList}">
         <th th:text="${result.enteredTime}"></th>
@@ -21,6 +22,7 @@ Orders:<br/>
         <th th:text="${result.orderLegCollection[0].instrument.symbol}"></th>
         <th th:text="${result.orderLegCollection[0].quantity}"></th>
         <th th:text="${result.status}"></th>
+        <th th:text="${result.orderActivityCollection[0].executionLegs[0].price}"></th>
     </tr>
 </table>
 </body>

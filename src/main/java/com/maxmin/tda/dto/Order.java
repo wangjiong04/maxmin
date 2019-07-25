@@ -26,4 +26,5 @@ public class Order {
     private Date closeTime;
     private String tag;
     private int accountId;
+    private List<OrderActivity> orderActivityCollection;
 }
