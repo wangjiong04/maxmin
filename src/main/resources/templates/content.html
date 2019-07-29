@@ -101,6 +101,7 @@
                 },
                 success: function (data) {
                     $("#transactionResult").empty().append(data);
+                    $('#tblTransaction').DataTable();
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     alert(XMLHttpRequest.responseText);
@@ -118,6 +119,7 @@
                 },
                 success: function (data) {
                     $("#orders").empty().append(data);
+                    $('#tblOrders').DataTable();
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     alert(XMLHttpRequest.responseText);
