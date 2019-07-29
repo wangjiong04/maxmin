@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
     <script type="text/javascript">
+        $(document).ready(function () {
+            $('#stocks').DataTable();
+        });
         $(function () {
             window.setInterval(function () {
                 var favorite = [];
@@ -17,6 +25,7 @@
                     data: {selectedSymbol: favorite.join(",")},
                     success: function (data) {
                         $("#result").empty().append(data);
+                        $('#stocks').DataTable();
                     }
                 })
                 ;
@@ -119,6 +128,7 @@
     </script>
 </head>
 <body>
+
 <table>
     <tr>
         <td>
@@ -136,7 +146,8 @@
 </table>
 <br/>
 <div id="result">
-    <table border="1">
+    <table id="stocks" border="1" class="table table-striped table-bordered">
+        <thead>
         <tr>
             <th>index</th>
             <th>Symbol</th>
@@ -153,6 +164,8 @@
             <th>Qty</th>
             <th>-Qty</th>
         </tr>
+        </thead>
+        <tbody>
         <tr th:each="quote,listStat : ${list}">
             <th th:text="${listStat.index}+1"></th>
             <th><input type="checkbox" name="selectedBox" id="selectedBox"
@@ -171,6 +184,7 @@
             <th></th>
             <th></th>
         </tr>
+        </tbody>
     </table>
 </div>
 <div id="traderesult">

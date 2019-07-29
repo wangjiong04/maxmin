@@ -2,23 +2,32 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css"/>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
     <title>result</title>
 </head>
 <body>
 Trade Result:<br/>
-<table border="1">
+<table border="1" class="table table-striped table-bordered" id="tblTrade">
+    <thead>
     <tr>
         <th>Symbol</th>
         <th>Quantity</th>
         <th>Status</th>
         <th>Message</th>
     </tr>
+    </thead>
+    <tbody>
     <tr th:each="result : ${traderesult}">
         <th th:text="${result.symbol}"></th>
         <th th:text="${result.quantity}"></th>
         <th th:text="${result.status}"></th>
         <th th:text="${result.message}"></th>
     </tr>
+    </tbody>
 </table>
 </body>
 </html>
