@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.maxmin.tda.utils.Constant;
 import lombok.Data;
 
+import java.text.DecimalFormat;
 import java.util.Date;
 
 @Data
@@ -96,7 +97,25 @@ public class Quote {
     @JsonProperty("delayed")
     private Boolean delayed;
 
+    private Double avgPrice;
+
+    private String change;
+
     private long quantity;
+
+    public Double getAvgPrice() {
+        return Double.parseDouble(formatDouble(avgPrice));
+    }
+
+    public String getChange() {
+        change = formatDouble((avgPrice - lastPrice) * 100 / avgPrice) + "%";
+        return change;
+    }
+
+    private String formatDouble(Double d) {
+        DecimalFormat df = new DecimalFormat("###.##");
+        return df.format(d);
+    }
 
     public String getDescription() {
         return description.split(" ")[0];

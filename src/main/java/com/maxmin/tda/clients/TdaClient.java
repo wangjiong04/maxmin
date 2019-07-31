@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxmin.tda.dto.Account;
 import com.maxmin.tda.dto.Order;
 import com.maxmin.tda.dto.OrderLeg;
+import com.maxmin.tda.dto.Position;
 import com.maxmin.tda.dto.Quote;
 import com.maxmin.tda.dto.Token;
 import com.maxmin.tda.dto.TradeRequest;
@@ -79,14 +80,19 @@ public class TdaClient {
     }
 
     public List<Quote> getQuotes() throws IOException {
-        Map<String, Long> stocks = getStocks();
-        String symbols = stocks.keySet().stream().collect(Collectors.joining(","));
+        Map<String, Position> accountStock = getAccountStock(accountId);
+        String symbols = accountStock.keySet().stream().collect(Collectors.joining(","));
+
+        //Map<String, Long> stocks = getStocks();
+
+        //String symbols = stocks.keySet().stream().collect(Collectors.joining(","));
 
         List<Quote> quotes = getQuoteBySymbols(symbols);
         for (Quote quote : quotes
         ) {
-            if (stocks.containsKey(quote.getSymbol())) {
-                quote.setQuantity(stocks.get(quote.getSymbol()));
+            if (accountStock.containsKey(quote.getSymbol())) {
+                quote.setQuantity(accountStock.get(quote.getSymbol()).getLongQuantity());
+                quote.setAvgPrice(accountStock.get(quote.getSymbol()).getAveragePrice());
             }
         }
         return quotes;
@@ -184,6 +190,26 @@ public class TdaClient {
                         new ParameterizedTypeReference<List<Account>>() {
                         });
         return response.getBody();
+    }
+
+    private Map<String, Position> getAccountStock(String accountId) {
+        String accessToken = getAccessToken();
+        if (StringUtils.isEmpty(accessToken)) {
+            return Collections.emptyMap();
+        }
+        String transactionsUrl = String
+                .format("https://api.tdameritrade.com/v1/accounts/%s?fields=positions", accountId);
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity entity = getEntity(accessToken);
+
+        ResponseEntity<Account> response = restTemplate
+                .exchange(transactionsUrl, HttpMethod.GET, entity,
+                        new ParameterizedTypeReference<Account>() {
+                        });
+        return response.getBody().getSecuritiesAccount().getPositions().stream()
+                .filter(position -> "EQUITY".equals(position.getInstrument().getAssetType()))
+                .collect(Collectors.toMap(p -> p.getInstrument().getSymbol(),
+                        p -> p));
     }
 
 

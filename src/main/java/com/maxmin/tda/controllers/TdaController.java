@@ -67,9 +67,9 @@ public class TdaController {
 
     @RequestMapping(value = "content")
     public ModelAndView getContent(HttpServletRequest request) throws IOException {
-        List<Quote> list = tdaClient.getQuotes();
+        //List<Quote> list = tdaClient.getQuotes();
         ModelAndView model = new ModelAndView("content");
-        model.addObject("list", list);
+        //model.addObject("list", list);
         return model;
     }
 
