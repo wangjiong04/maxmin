@@ -4,17 +4,16 @@
     <meta charset="UTF-8"/>
     <title>Title</title>
     <link rel="stylesheet" type="text/css" media="all" href="../static/css/style.css" th:href="@{/css/style.css}"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css"/>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"/>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
     <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
     <script type="text/javascript">
         $(function () {
             //$('#loading').show();
             getStock();
-            //window.setInterval(getStock, 5 * 1000);
+            window.setInterval(getStock, 5 * 1000);
             $('#loading').hide();
         });
 
@@ -34,13 +33,13 @@
                         .DataTable({
                             "order": []
                         });
-                    table = $('#stocks').DataTable();
-                    $('#stocks').on('order.dt', function () {
-                        var order = table.order();
+                    var dt = table.DataTable();
+                    table.on('order.dt', function () {
+                        var order = dt.order();
                         $("#txtSortNumber").val(order[0][0]);
                         $("#txtSortDirection").val(order[0][1]);
                     });
-                    $('#stocks').DataTable().order([$("#txtSortNumber").val(), $("#txtSortDirection").val()])
+                    table.DataTable().order([$("#txtSortNumber").val(), $("#txtSortDirection").val()])
                         .draw();
                 }
             })
@@ -48,18 +47,19 @@
         }
 
         function selectAll() {
+            var chkAll = $("input[name='selectedAll']");
             $.each($("input[name='selectedBox']"), function () {
-                if ($("input[name='selectedAll']").attr('checked')) {
+                if (chkAll.attr('checked')) {
                     $(this).attr('checked', false);
                 } else {
                     $(this).attr('checked', true);
                 }
 
             });
-            if ($("input[name='selectedAll']").attr('checked')) {
-                $("input[name='selectedAll']").attr('checked', false);
+            if (chkAll.attr('checked')) {
+                chkAll.attr('checked', false);
             } else {
-                $("input[name='selectedAll']").attr('checked', true);
+                chkAll.attr('checked', true);
             }
         }
 
@@ -131,6 +131,31 @@
             }
         }
 
+        function checkboxChanged(checkbox) {
+            var txtTicker = $("#txtTicker");
+            var strTicker = txtTicker.val().trim();
+            var arr = strTicker.split(",");
+            var contained = arr.includes(checkbox.value);
+            if (checkbox.checked) {
+                if (!contained) {
+                    if ("" == strTicker) {
+                        strTicker = checkbox.value;
+                    } else {
+                        strTicker = strTicker + "," + checkbox.value;
+                    }
+                }
+            } else {
+                if (contained) {
+                    var index = $.inArray(checkbox.value, arr);
+                    if (index != -1) {
+                        arr.splice(index, 1);
+                    }
+                    strTicker = arr.join(",");
+                }
+            }
+            txtTicker.val(strTicker);
+        }
+
         function getOrders() {
             if ($('#btnOrders').val() == "Show Orders") {
                 $.ajax({
@@ -163,13 +188,19 @@
 <table>
     <tr>
         <td>
-            <input type="checkbox" name="selectedAll" id="selectedAll" hidden="hidden"/>
-            <input type="button" value="Select/Deselect All" id="btnSelect" th:onclick="'selectAll();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            Tickers: <input type="text" id="txtTicker" value="" size="60"/>
             <input type="button" value="Sell All" id="btnSellAll"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" value="Sell with Quantity" id="btnSell" th:onclick="'sell();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" value="Buy with Quantity" id="btnBuy" th:onclick="'buy();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <label>Quantity</label>
-            <input type="text" id="txtQuantity" value="1"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="text" id="txtQuantity" value="1" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="checkbox" name="selectedAll" id="selectedAll" hidden="hidden"/>
+            <input type="button" value="Select/Deselect All" id="btnSelect" th:onclick="'selectAll();'"
+                   hidden="hidden"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" value="Show Transactions" id="btnTransactions" th:onclick="'getTransaction();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" value="Show Orders" id="btnOrders" th:onclick="'getOrders();'"/>
         </td>
