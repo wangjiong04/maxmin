@@ -5,7 +5,7 @@
     <title>Title</title>
 </head>
 <body>
-<table class="stripe" id="stocks">
+<table class="display" id="stocks">
 
     <thead>
     <tr>
@@ -28,7 +28,6 @@
     <tbody>
     <tr th:each="quote,listStat : ${list}">
         <th align="left"><input type="checkbox" name="selectedBox" id="selectedBox"
-                                th:attr="checked=${selectedSymbol.contains(quote.symbol)?true:false}"
                                 th:value="${quote.symbol}"
                                 th:text="${quote.symbol}" th:onchange="'checkboxChanged(this);'"/>
         </th>

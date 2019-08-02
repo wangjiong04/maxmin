@@ -5,10 +5,19 @@
     <title>Title</title>
     <link rel="stylesheet" type="text/css" media="all" href="../static/css/style.css" th:href="@{/css/style.css}"/>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.6/css/buttons.dataTables.min.css"/>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
     <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+
+    <script src="https://cdn.datatables.net/buttons/1.5.6/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.flash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.print.min.js"></script>
     <script type="text/javascript">
         $(function () {
             //$('#loading').show();
@@ -31,7 +40,20 @@
                     var table = $('#stocks');
                     table
                         .DataTable({
-                            "order": []
+                            "order": [],
+                            dom: 'Bfrtip',
+                            buttons: [
+                                {
+                                    text: 'Select/Deselect All',
+                                    action: function (e, dt, node, config) {
+                                        selectAll();
+                                    }
+                                },
+                                'copy', 'csv', 'excel', 'pdf', 'print'
+                            ],
+                            "initComplete": function (settings, json) {
+                                resetCheckboxes();
+                            }
                         });
                     var dt = table.DataTable();
                     table.on('order.dt', function () {
@@ -39,11 +61,18 @@
                         $("#txtSortNumber").val(order[0][0]);
                         $("#txtSortDirection").val(order[0][1]);
                     });
-                    table.DataTable().order([$("#txtSortNumber").val(), $("#txtSortDirection").val()])
-                        .draw();
+                    if ("" != $("#txtSortNumber").val()) {
+                        table.DataTable().order([$("#txtSortNumber").val(), $("#txtSortDirection").val()])
+                            .draw();
+                    }
+
                 }
             })
             ;
+        }
+
+        function notImplement() {
+            alert("Not completed.");
         }
 
         function selectAll() {
@@ -51,8 +80,12 @@
             $.each($("input[name='selectedBox']"), function () {
                 if (chkAll.attr('checked')) {
                     $(this).attr('checked', false);
+                    setTickers(false, $(this).val(), $("#txtTicker"));
+                    setTickers(false, $(this).val(), $("#hidTicker"));
                 } else {
                     $(this).attr('checked', true);
+                    setTickers(true, $(this).val(), $("#txtTicker"));
+                    setTickers(true, $(this).val(), $("#hidTicker"));
                 }
 
             });
@@ -61,6 +94,20 @@
             } else {
                 chkAll.attr('checked', true);
             }
+        }
+
+        function resetCheckboxes() {
+            $.each($("input[name='selectedBox']"), function () {
+                var checkBox = $(this);
+                var strTicker = $("#hidTicker").val().trim();
+                var arr = strTicker.split(",");
+                var contained = arr.includes(checkBox.val());
+                if (contained) {
+                    checkBox.attr('checked', true);
+                } else {
+                    checkBox.attr('checked', false);
+                }
+            });
         }
 
         function buy() {
@@ -132,21 +179,25 @@
         }
 
         function checkboxChanged(checkbox) {
-            var txtTicker = $("#txtTicker");
+            setTickers(checkbox.checked, checkbox.value, $("#txtTicker"));
+            setTickers(checkbox.checked, checkbox.value, $("#hidTicker"));
+        }
+
+        function setTickers(isChecked, value, txtTicker) {
             var strTicker = txtTicker.val().trim();
             var arr = strTicker.split(",");
-            var contained = arr.includes(checkbox.value);
-            if (checkbox.checked) {
+            var contained = arr.includes(value);
+            if (isChecked) {
                 if (!contained) {
                     if ("" == strTicker) {
-                        strTicker = checkbox.value;
+                        strTicker = value;
                     } else {
-                        strTicker = strTicker + "," + checkbox.value;
+                        strTicker = strTicker + "," + value;
                     }
                 }
             } else {
                 if (contained) {
-                    var index = $.inArray(checkbox.value, arr);
+                    var index = $.inArray(value, arr);
                     if (index != -1) {
                         arr.splice(index, 1);
                     }
@@ -155,6 +206,7 @@
             }
             txtTicker.val(strTicker);
         }
+
 
         function getOrders() {
             if ($('#btnOrders').val() == "Show Orders") {
@@ -185,28 +237,42 @@
 <body>
 <input type="hidden" id="txtSortNumber"/>
 <input type="hidden" id="txtSortDirection"/>
+<input type="checkbox" name="selectedAll" id="selectedAll" hidden="hidden"/>
 <table>
     <tr>
-        <td>
-            Tickers: <input type="text" id="txtTicker" value="" size="60"/>
-            <input type="button" value="Sell All" id="btnSellAll"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="button" value="Sell with Quantity" id="btnSell" th:onclick="'sell();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="button" value="Buy with Quantity" id="btnBuy" th:onclick="'buy();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            <label>Quantity</label>
-            <input type="text" id="txtQuantity" value="1" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
+        <td colspan="2">
+            Tickers: <input type="text" id="txtTicker" value="" size="60"/><input type="hidden" id="hidTicker" value=""
+                                                                                  size="60"/>
         </td>
     </tr>
     <tr>
+        <td>Action with Quantity:
+        </td>
         <td>
-            <input type="checkbox" name="selectedAll" id="selectedAll" hidden="hidden"/>
-            <input type="button" value="Select/Deselect All" id="btnSelect" th:onclick="'selectAll();'"
-                   hidden="hidden"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="text" id="txtQuantity" value="1" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Sell with Quantity" id="btnSell" th:onclick="'sell();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Buy with Quantity" id="btnBuy" th:onclick="'buy();'"/>
+        </td>
+    </tr>
+    <tr>
+        <td>Action with Amount:</td>
+        <td>
+            <input type="text" id="txtAmount" value="1" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Sell with Amount" id="btnSellAmount" th:onclick="'notImplement();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Buy with Amount" id="btnBuyAmount" th:onclick="'notImplement();'"/>
+        </td>
+    </tr>
+    <tr>
+        <td> Other Tables</td>
+        <td>
             <input type="button" value="Show Transactions" id="btnTransactions" th:onclick="'getTransaction();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" value="Show Orders" id="btnOrders" th:onclick="'getOrders();'"/>
         </td>
     </tr>
+
 </table>
 <br/>
+<hr width="100%"/>
 <div id="result">
 
 </div>
