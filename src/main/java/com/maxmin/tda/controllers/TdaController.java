@@ -115,6 +115,11 @@ public class TdaController {
         return trade(request, TradeType.BUY);
     }
 
+    @PostMapping(value = "/buyWithAmount")
+    public ModelAndView buyWithAmount(HttpServletRequest request) throws IOException {
+        return tradeWithAmount(request, TradeType.BUY);
+    }
+
     @PostMapping(value = "/sell")
     public ModelAndView sell(HttpServletRequest request) throws IOException {
         return trade(request, TradeType.SELL);
@@ -125,6 +130,16 @@ public class TdaController {
         String strQuantity = request.getParameter("quantity");
         int quantity = Integer.parseInt(strQuantity);
         List<TradeResponse> result = tdaClient.stockTrade(selectedSymbol, quantity, tradeType);
+        ModelAndView model = new ModelAndView("traderesult");
+        model.addObject("traderesult", result);
+        return model;
+    }
+
+    private ModelAndView tradeWithAmount(HttpServletRequest request, TradeType tradeType) throws IOException {
+        String selectedSymbol = request.getParameter("selectedSymbol");
+        String strAmount = request.getParameter("amount");
+        double amount = Integer.parseInt(strAmount);
+        List<TradeResponse> result = tdaClient.stockTradeWithAmount(selectedSymbol, amount, tradeType);
         ModelAndView model = new ModelAndView("traderesult");
         model.addObject("traderesult", result);
         return model;
