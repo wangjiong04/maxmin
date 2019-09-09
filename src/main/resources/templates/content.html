@@ -160,6 +160,31 @@
             ;
         }
 
+        function sellWithAmount() {
+            if ("" == $("#txtTicker").val()) {
+                alert("Tickers is emtpy");
+            }
+            var favorite = [];
+            $.each($("input[name='selectedBox']:checked"), function () {
+                favorite.push($(this).val());
+            });
+            $.ajax({
+                type: "POST",
+                url: "/sellWithAmount",
+                data: {
+                    selectedSymbol: $("#txtTicker").val(),
+                    amount: $("#txtAmount").val()
+                },
+                success: function (data) {
+                    $("#traderesult").empty().append(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.responseText);
+                }
+            })
+            ;
+        }
+
         function sell() {
             if ("" == $("#txtTicker").val()) {
                 alert("Tickers is emtpy");
@@ -289,7 +314,8 @@
         <td>Action with Amount:</td>
         <td>
             <input type="text" id="txtAmount" value="1" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="button" value="Buy with Amount" id="btnBuyAmount" th:onclick="'buyWithAmount();'"/>
+            <input type="button" value="Buy with Amount" id="btnBuyAmount" th:onclick="'buyWithAmount();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Sell with Amount" id="btnSellAmount" th:onclick="'sellWithAmount();'"/>
         </td>
     </tr>
     <tr>

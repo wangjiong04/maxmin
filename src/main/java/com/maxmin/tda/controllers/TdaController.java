@@ -120,6 +120,11 @@ public class TdaController {
         return tradeWithAmount(request, TradeType.BUY);
     }
 
+    @PostMapping(value = "/sellWithAmount")
+    public ModelAndView sellWithAmount(HttpServletRequest request) throws IOException {
+        return tradeWithAmount(request, TradeType.SELL);
+    }
+
     @PostMapping(value = "/sell")
     public ModelAndView sell(HttpServletRequest request) throws IOException {
         return trade(request, TradeType.SELL);
