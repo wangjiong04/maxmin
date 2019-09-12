@@ -16,7 +16,6 @@ import com.maxmin.tda.dto.Transaction;
 import com.maxmin.tda.utils.ObjectMapperFactory;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -52,9 +51,6 @@ public class TdaClient {
     @Value("${redirect_uri}")
     private String redirect_uri;
 
-    @Value("${accountId}")
-    private String accountId;
-
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance()
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
@@ -79,7 +75,7 @@ public class TdaClient {
         getTokenFromTda(true, code);
     }
 
-    public List<Quote> getQuotes() throws IOException {
+    public List<Quote> getQuotes(String accountId) throws IOException {
         Map<String, Position> accountStock = getAccountStock(accountId);
         String symbols = accountStock.keySet().stream().collect(Collectors.joining(","));
 
@@ -99,7 +95,7 @@ public class TdaClient {
     }
 
     public List<TradeResponse> stockTradeWithAmount(String symbols, double amount,
-                                                    TradeType tradeType) throws IOException {
+                                                    TradeType tradeType, String accountId) throws IOException {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyList();
@@ -129,7 +125,8 @@ public class TdaClient {
         return responseList;
     }
 
-    public List<TradeResponse> stockTrade(String symbols, int quantity, TradeType tradeType) throws IOException {
+    public List<TradeResponse> stockTrade(String symbols, int quantity, TradeType tradeType,
+                                          String accountId) throws IOException {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyList();
@@ -157,7 +154,7 @@ public class TdaClient {
         return responseList;
     }
 
-    public List<Transaction> getTransaction() {
+    public List<Transaction> getTransaction(String accountId) {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyList();
@@ -175,7 +172,7 @@ public class TdaClient {
 
     }
 
-    public List<Order> getOrders() {
+    public List<Order> getOrders(String accountId) {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyList();
@@ -206,7 +203,6 @@ public class TdaClient {
                 .collect(Collectors.toMap(p -> p.getInstrument().getSymbol(), p -> p.getLongQuantity()));
     }
 
-    @Cacheable("accounts")
     public List<Account> getAccounts() {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {

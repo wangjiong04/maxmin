@@ -1,6 +1,7 @@
 package com.maxmin.tda.controllers;
 
 import com.maxmin.tda.clients.TdaClient;
+import com.maxmin.tda.dto.Account;
 import com.maxmin.tda.dto.Config;
 import com.maxmin.tda.dto.Order;
 import com.maxmin.tda.dto.Quote;
@@ -42,20 +43,26 @@ public class TdaController {
 
 
     @RequestMapping(value = "app/api/connect", method = {RequestMethod.GET, RequestMethod.POST})
-    public void getCode(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
+    public ModelAndView getCode(@RequestParam("code") String code, HttpServletResponse response,
+                                RedirectAttributes redirectAttributes) throws IOException {
 
         System.out.println("Authorization Code------" + code);
 
         tdaClient.getTokeByCode(code);
 
         System.out.println("Access Token Response ---------" + tdaClient.getToken().getAccess_token());
-        response.sendRedirect("/content");
+        List<Account> accounts = tdaClient.getAccounts();
+        String accountId = accounts.get(0).getSecuritiesAccount().getAccountId();
+        ModelAndView model = new ModelAndView("content");
+        model.addObject("accountId", accountId);
+        return model;
+        //response.sendRedirect("/content");
     }
 
     @RequestMapping(value = "getSymbols", method = RequestMethod.GET)
     public RedirectView getSymbols(HttpServletRequest request,
                                    RedirectAttributes redirectAttributes) throws IOException {
-        List<Quote> list = tdaClient.getQuotes();
+        List<Quote> list = tdaClient.getQuotes(request.getParameter("accountId"));
         RedirectView redirectView = new RedirectView();
         String selectedSymbol = request.getParameter("selectedSymbol");
         redirectAttributes.addFlashAttribute("list", list);
@@ -89,7 +96,7 @@ public class TdaController {
     public ModelAndView getTransaction(HttpServletRequest request) {
         String startDate = request.getParameter("startDate");
         ModelAndView model = new ModelAndView("transaction");
-        List<Transaction> list = tdaClient.getTransaction();
+        List<Transaction> list = tdaClient.getTransaction(request.getParameter("accountId"));
         model.addObject("transactionList", list);
         return model;
     }
@@ -98,7 +105,7 @@ public class TdaController {
     public ModelAndView getOrders(HttpServletRequest request) {
         String startDate = request.getParameter("startDate");
         ModelAndView model = new ModelAndView("orders");
-        List<Order> list = tdaClient.getOrders();
+        List<Order> list = tdaClient.getOrders(request.getParameter("accountId"));
         model.addObject("orderList", list);
         return model;
     }
@@ -134,7 +141,8 @@ public class TdaController {
         String selectedSymbol = request.getParameter("selectedSymbol");
         String strQuantity = request.getParameter("quantity");
         int quantity = Integer.parseInt(strQuantity);
-        List<TradeResponse> result = tdaClient.stockTrade(selectedSymbol, quantity, tradeType);
+        List<TradeResponse> result = tdaClient
+                .stockTrade(selectedSymbol, quantity, tradeType, request.getParameter("accountId"));
         ModelAndView model = new ModelAndView("traderesult");
         model.addObject("traderesult", result);
         return model;
@@ -144,7 +152,8 @@ public class TdaController {
         String selectedSymbol = request.getParameter("selectedSymbol");
         String strAmount = request.getParameter("amount");
         double amount = Integer.parseInt(strAmount);
-        List<TradeResponse> result = tdaClient.stockTradeWithAmount(selectedSymbol, amount, tradeType);
+        List<TradeResponse> result = tdaClient
+                .stockTradeWithAmount(selectedSymbol, amount, tradeType, request.getParameter("accountId"));
         ModelAndView model = new ModelAndView("traderesult");
         model.addObject("traderesult", result);
         return model;

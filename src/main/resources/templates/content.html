@@ -34,7 +34,10 @@
             $.ajax({
                 type: "GET",
                 url: "/getSymbols",
-                data: {selectedSymbol: favorite.join(",")},
+                data: {
+                    selectedSymbol: favorite.join(","),
+                    accountId: $("#txtAccountId").val()
+                },
                 success: function (data) {
                     $("#result").empty().append(data);
                     var table = $('#stocks');
@@ -123,7 +126,8 @@
                 url: "/buy",
                 data: {
                     selectedSymbol: $("#txtTicker").val(),
-                    quantity: $("#txtQuantity").val()
+                    quantity: $("#txtQuantity").val(),
+                    accountId: $("#txtAccountId").val()
                 },
                 success: function (data) {
                     $("#traderesult").empty().append(data);
@@ -148,7 +152,8 @@
                 url: "/buyWithAmount",
                 data: {
                     selectedSymbol: $("#txtTicker").val(),
-                    amount: $("#txtAmount").val()
+                    amount: $("#txtAmount").val(),
+                    accountId: $("#txtAccountId").val()
                 },
                 success: function (data) {
                     $("#traderesult").empty().append(data);
@@ -173,7 +178,8 @@
                 url: "/sellWithAmount",
                 data: {
                     selectedSymbol: $("#txtTicker").val(),
-                    amount: $("#txtAmount").val()
+                    amount: $("#txtAmount").val(),
+                    accountId: $("#txtAccountId").val()
                 },
                 success: function (data) {
                     $("#traderesult").empty().append(data);
@@ -198,7 +204,8 @@
                 url: "/sell",
                 data: {
                     selectedSymbol: $("#txtTicker").val(),
-                    quantity: $("#txtQuantity").val()
+                    quantity: $("#txtQuantity").val(),
+                    accountId: $("#txtAccountId").val()
                 },
                 success: function (data) {
                     $("#traderesult").empty().append(data);
@@ -216,7 +223,8 @@
                     type: "GET",
                     url: "/transactions",
                     data: {
-                        startDate: "2019-06-21"
+                        startDate: "2019-06-21",
+                        accountId: $("#txtAccountId").val()
                     },
                     success: function (data) {
                         $("#transactionResult").empty().append(data);
@@ -270,7 +278,8 @@
                     type: "GET",
                     url: "/orders",
                     data: {
-                        startDate: "2019-06-21"
+                        startDate: "2019-06-21",
+                        accountId: $("#txtAccountId").val()
                     },
                     success: function (data) {
                         $("#orders").empty().append(data);
@@ -294,6 +303,7 @@
 <input type="hidden" id="txtSortNumber"/>
 <input type="hidden" id="txtSortDirection"/>
 <input type="checkbox" name="selectedAll" id="selectedAll" hidden="hidden"/>
+<input type="hidden" id="txtAccountId" th:value="${accountId}"/>
 <table>
     <tr>
         <td colspan="2">
