@@ -43,7 +43,7 @@ public class TdaController {
 
 
     @RequestMapping(value = "app/api/connect", method = {RequestMethod.GET, RequestMethod.POST})
-    public ModelAndView getCode(@RequestParam("code") String code, HttpServletResponse response,
+    public RedirectView getCode(@RequestParam("code") String code, HttpServletResponse response,
                                 RedirectAttributes redirectAttributes) throws IOException {
 
         System.out.println("Authorization Code------" + code);
@@ -53,9 +53,11 @@ public class TdaController {
         System.out.println("Access Token Response ---------" + tdaClient.getToken().getAccess_token());
         List<Account> accounts = tdaClient.getAccounts();
         String accountId = accounts.get(0).getSecuritiesAccount().getAccountId();
-        ModelAndView model = new ModelAndView("content");
-        model.addObject("accountId", accountId);
-        return model;
+        RedirectView redirectView = new RedirectView();
+        redirectAttributes.addFlashAttribute("accountId", accountId);
+        redirectView.setContextRelative(true);
+        redirectView.setUrl("/content");
+        return redirectView;
         //response.sendRedirect("/content");
     }
 
