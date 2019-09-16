@@ -154,6 +154,33 @@ public class TdaClient {
         return responseList;
     }
 
+    public List<TradeResponse> sellAll(String accountId) throws IOException {
+        String accessToken = getAccessToken();
+        if (StringUtils.isEmpty(accessToken)) {
+            return Collections.emptyList();
+        }
+        List<Quote> list = getQuotes(accountId);
+        //List<Account> accounts = getAccounts();
+        //String accountId = accounts.get(0).getSecuritiesAccount().getAccountId();
+        String transactionsUrl = "https://api.tdameritrade.com/v1/accounts/" + accountId + "/orders";
+        HttpHeaders headers = getHeader(accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        List<TradeResponse> responseList = new ArrayList<>();
+        for (Quote quote : list
+                ) {
+            RestTemplate restTemplate = new RestTemplate();
+            TradeRequest tradeRequest = new TradeRequest();
+            OrderLeg orderLeg = new OrderLeg(quote.getSymbol(), TradeType.SELL.name(), (int)quote.getQuantity());
+            tradeRequest.getOrderLegCollection().add(orderLeg);
+            HttpEntity entity = new HttpEntity<>(tradeRequest, headers);
+            ResponseEntity<String> response = restTemplate
+                    .exchange(transactionsUrl, HttpMethod.POST, entity, String.class);
+            responseList.add(new TradeResponse(quote.getSymbol(), (int)quote.getQuantity(), response.getStatusCode().name(),
+                    response.getBody()));
+            //quote.getHighPrice();
+        }
+        return responseList;
+    }
     public List<Transaction> getTransaction(String accountId) {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {

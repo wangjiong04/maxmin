@@ -216,7 +216,22 @@
             })
             ;
         }
-
+        function sellAll() {
+            $.ajax({
+                type: "POST",
+                url: "/sellAll",
+                data: {
+                    accountId: $("#txtAccountId").val()
+                },
+                success: function (data) {
+                    $("#traderesult").empty().append(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.responseText);
+                }
+            })
+            ;
+        }
         function getTransaction() {
             if ($('#btnTransactions').val() == "Show Transactions") {
                 $.ajax({
@@ -329,7 +344,7 @@
         </td>
     </tr>
     <tr>
-        <td><input type="button" value="     Sell All     " id="btnSellAll" th:onclick="'notImplement();'"/></td>
+        <td><input type="button" value="     Sell All     " id="btnSellAll" th:onclick="'sellAll();'"/></td>
         <td>
             &nbsp;&nbsp;&nbsp;&nbsp;
         </td>
