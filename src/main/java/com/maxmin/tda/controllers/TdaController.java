@@ -155,7 +155,7 @@ public class TdaController {
     }
 
     private ModelAndView tradeAll(HttpServletRequest request) throws IOException {
-
+        String selectedSymbol = request.getParameter("selectedSymbol");
         List<TradeResponse> result = tdaClient
                 .sellAll(request.getParameter("accountId"));
         ModelAndView model = new ModelAndView("traderesult");

@@ -217,10 +217,14 @@
             ;
         }
         function sellAll() {
+            if ("" == $("#txtTicker").val()) {
+                alert("Tickers is emtpy");
+            }
             $.ajax({
                 type: "POST",
                 url: "/sellAll",
                 data: {
+                    selectedSymbol: $("#txtTicker").val(),
                     accountId: $("#txtAccountId").val()
                 },
                 success: function (data) {
