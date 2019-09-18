@@ -154,7 +154,7 @@ public class TdaClient {
         return responseList;
     }
 
-    public List<TradeResponse> sellAll(String symbols,String accountId) throws IOException {
+    public List<TradeResponse> sellAll(String symbols, String accountId) throws IOException {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyList();
@@ -169,22 +169,26 @@ public class TdaClient {
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         List<TradeResponse> responseList = new ArrayList<>();
         for (Quote quote : list
-                ) {
+        ) {
             if (accountStock.containsKey(quote.getSymbol())) {
                 RestTemplate restTemplate = new RestTemplate();
                 TradeRequest tradeRequest = new TradeRequest();
-                OrderLeg orderLeg = new OrderLeg(quote.getSymbol(), TradeType.SELL.name(), (int) quote.getQuantity());
+                OrderLeg orderLeg = new OrderLeg(quote.getSymbol(), TradeType.SELL.name(),
+                        accountStock.get(quote.getSymbol()).getLongQuantity().intValue());
                 tradeRequest.getOrderLegCollection().add(orderLeg);
                 HttpEntity entity = new HttpEntity<>(tradeRequest, headers);
                 ResponseEntity<String> response = restTemplate
                         .exchange(transactionsUrl, HttpMethod.POST, entity, String.class);
-                responseList.add(new TradeResponse(quote.getSymbol(),  accountStock.get(quote.getSymbol()).getLongQuantity().intValue(), response.getStatusCode().name(),
+                responseList.add(new TradeResponse(quote.getSymbol(),
+                        accountStock.get(quote.getSymbol()).getLongQuantity().intValue(),
+                        response.getStatusCode().name(),
                         response.getBody()));
                 //quote.getHighPrice();
             }
         }
         return responseList;
     }
+
     public List<Transaction> getTransaction(String accountId) {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
