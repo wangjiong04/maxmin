@@ -101,6 +101,7 @@ public class TdaClient {
             return Collections.emptyList();
         }
         List<Quote> list = getQuoteBySymbols(symbols);
+        Map<String, Position> accountStock = getAccountStock(accountId);
         double avgAmount = amount / list.size();
         //List<Account> accounts = getAccounts();
         //String accountId = accounts.get(0).getSecuritiesAccount().getAccountId();
@@ -113,7 +114,7 @@ public class TdaClient {
             int quantity = (int) (avgAmount / quote.getHighPrice());
             RestTemplate restTemplate = new RestTemplate();
             TradeRequest tradeRequest = new TradeRequest();
-            OrderLeg orderLeg = new OrderLeg(quote.getSymbol(), tradeType.name(), quantity);
+            OrderLeg orderLeg = createOrderLeg(accountStock, quote.getSymbol(), tradeType, quantity);
             tradeRequest.getOrderLegCollection().add(orderLeg);
             HttpEntity entity = new HttpEntity<>(tradeRequest, headers);
             ResponseEntity<String> response = restTemplate
@@ -132,6 +133,7 @@ public class TdaClient {
             return Collections.emptyList();
         }
         List<Quote> list = getQuoteBySymbols(symbols);
+        Map<String, Position> accountStock = getAccountStock(accountId);
         //List<Account> accounts = getAccounts();
         //String accountId = accounts.get(0).getSecuritiesAccount().getAccountId();
         String transactionsUrl = "https://api.tdameritrade.com/v1/accounts/" + accountId + "/orders";
@@ -142,7 +144,7 @@ public class TdaClient {
         ) {
             RestTemplate restTemplate = new RestTemplate();
             TradeRequest tradeRequest = new TradeRequest();
-            OrderLeg orderLeg = new OrderLeg(quote.getSymbol(), tradeType.name(), quantity);
+            OrderLeg orderLeg = createOrderLeg(accountStock, quote.getSymbol(), tradeType, quantity);
             tradeRequest.getOrderLegCollection().add(orderLeg);
             HttpEntity entity = new HttpEntity<>(tradeRequest, headers);
             ResponseEntity<String> response = restTemplate
@@ -197,14 +199,16 @@ public class TdaClient {
         String transactionsUrl = String
                 .format("https://api.tdameritrade.com/v1/accounts/%s/transactions?type=TRADE&startDate=%s", accountId,
                         getOneWeekBefore());
-        RestTemplate restTemplate = new RestTemplate();
-        HttpEntity entity = getEntity(accessToken);
-        ResponseEntity<List<Transaction>> response = restTemplate
-                .exchange(transactionsUrl, HttpMethod.GET, entity,
-                        new ParameterizedTypeReference<List<Transaction>>() {
-                        });
-        return response.getBody();
+        return getListResponse(transactionsUrl, accessToken, new ParameterizedTypeReference<List<Transaction>>() {});
+    }
 
+    private OrderLeg createOrderLeg(Map<String, Position> accountStock, String symbol, TradeType tradeType,
+                                    int quantity) {
+        if (TradeType.SELL == tradeType && !accountStock.containsKey(symbol)) {
+            return new OrderLeg(symbol, "SELL_SHORT", quantity);
+        } else {
+            return new OrderLeg(symbol, tradeType.name(), quantity);
+        }
     }
 
     public List<Order> getOrders(String accountId) {
@@ -215,27 +219,7 @@ public class TdaClient {
         String transactionsUrl = String
                 .format("https://api.tdameritrade.com/v1/accounts/%s/orders?fromEnteredTime=%s&toEnteredTime=%s",
                         accountId, getOneWeekBefore(), getCurrentDate());
-        RestTemplate restTemplate = new RestTemplate();
-        HttpEntity entity = getEntity(accessToken);
-        ResponseEntity<List<Order>> response = restTemplate
-                .exchange(transactionsUrl, HttpMethod.GET, entity,
-                        new ParameterizedTypeReference<List<Order>>() {
-                        });
-        return response.getBody();
-
-
-    }
-
-    private Map<String, Long> getStocks() {
-        String accessToken = getAccessToken();
-        if (StringUtils.isEmpty(accessToken)) {
-            return Collections.emptyMap();
-        }
-        List<Account> list = getAccounts();
-        return list.stream()
-                .flatMap(account -> account.getSecuritiesAccount().getPositions().stream())
-                .filter(position -> "EQUITY".equals(position.getInstrument().getAssetType()))
-                .collect(Collectors.toMap(p -> p.getInstrument().getSymbol(), p -> p.getLongQuantity()));
+        return getListResponse(transactionsUrl, accessToken, new ParameterizedTypeReference<List<Order>>() {});
     }
 
     public List<Account> getAccounts() {
@@ -244,13 +228,16 @@ public class TdaClient {
             return Collections.emptyList();
         }
         String transactionsUrl = "https://api.tdameritrade.com/v1/accounts?fields=positions";
+        return getListResponse(transactionsUrl, accessToken, new ParameterizedTypeReference<List<Account>>() {});
+    }
+
+    private <T> List<T> getListResponse(String transactionsUrl, String accessToken,
+                                        ParameterizedTypeReference<List<T>> responseType) {
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity entity = getEntity(accessToken);
 
-        ResponseEntity<List<Account>> response = restTemplate
-                .exchange(transactionsUrl, HttpMethod.GET, entity,
-                        new ParameterizedTypeReference<List<Account>>() {
-                        });
+        ResponseEntity<List<T>> response = restTemplate
+                .exchange(transactionsUrl, HttpMethod.GET, entity, responseType);
         return response.getBody();
     }
 
