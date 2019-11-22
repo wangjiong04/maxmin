@@ -7,6 +7,8 @@ import com.maxmin.tda.dto.Account;
 import com.maxmin.tda.dto.Order;
 import com.maxmin.tda.dto.OrderLeg;
 import com.maxmin.tda.dto.Position;
+import com.maxmin.tda.dto.PriceDto;
+import com.maxmin.tda.dto.PriceResult;
 import com.maxmin.tda.dto.Quote;
 import com.maxmin.tda.dto.Token;
 import com.maxmin.tda.dto.TradeRequest;
@@ -33,6 +35,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -40,6 +43,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @Component
@@ -222,6 +226,31 @@ public class TdaClient {
         return getListResponse(transactionsUrl, accessToken, new ParameterizedTypeReference<List<Order>>() {});
     }
 
+    public String getPrice(String date, String stock, TimeZone timeZone) {
+        String accessToken = getAccessToken();
+        if (StringUtils.isEmpty(accessToken)) {
+            return "";
+        }
+        LocalDateTime localDateTime = LocalDateTime.parse(date);
+        Long input = localDateTime.toInstant(timeZone.toZoneId().getRules().getOffset(localDateTime)).toEpochMilli();
+        LocalDateTime startDate = LocalDateTime
+                .of(localDateTime.getYear(), localDateTime.getMonth(), localDateTime.getDayOfMonth(), 0, 0);
+        LocalDateTime endDate = LocalDateTime
+                .of(localDateTime.getYear(), localDateTime.getMonth(), localDateTime.getDayOfMonth(), 23, 59);
+        String start = String
+                .valueOf(startDate.toInstant(timeZone.toZoneId().getRules().getOffset(startDate)).toEpochMilli());
+        String end = String
+                .valueOf(endDate.toInstant(timeZone.toZoneId().getRules().getOffset(endDate)).toEpochMilli());
+        String searchUrl = String
+                .format("https://api.tdameritrade.com/v1/marketdata/%s/pricehistory?periodType=day&frequencyType=minute&frequency=1&startDate=%s&endDate=%s",
+                        stock, start, end);
+        PriceResult response = getResponse(searchUrl, accessToken,
+                new ParameterizedTypeReference<PriceResult>() {});
+        List<PriceDto> priceDtos = response.getCandles().stream().filter(e -> e.getDatetime() < input)
+                .collect(Collectors.toList());
+        return priceDtos.get(priceDtos.size() - 1).getHigh().toString();
+    }
+
     public List<Account> getAccounts() {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
@@ -237,6 +266,16 @@ public class TdaClient {
         HttpEntity entity = getEntity(accessToken);
 
         ResponseEntity<List<T>> response = restTemplate
+                .exchange(transactionsUrl, HttpMethod.GET, entity, responseType);
+        return response.getBody();
+    }
+
+    private <T> T getResponse(String transactionsUrl, String accessToken,
+                              ParameterizedTypeReference<T> responseType) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity entity = getEntity(accessToken);
+
+        ResponseEntity<T> response = restTemplate
                 .exchange(transactionsUrl, HttpMethod.GET, entity, responseType);
         return response.getBody();
     }

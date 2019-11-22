@@ -18,7 +18,26 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.print.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.43/css/bootstrap-datetimepicker.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.43/js/bootstrap-datetimepicker.min.js"></script>
+    <style type="text/css">
+        .top-buffer {
+            margin-top: 4px;
+        }
+
+        .bottom-buffer {
+            margin-bottom: 50px;
+        }
+    </style>
     <script type="text/javascript">
+        $(document).ready(function () {
+            $('#datetimepicker').datetimepicker({format: 'YYYY-MM-DDThh:mm:ss'});
+        });
         $(function () {
             //$('#loading').show();
             getStock();
@@ -216,6 +235,7 @@
             })
             ;
         }
+
         function sellAll() {
             if ("" == $("#txtTicker").val()) {
                 alert("Tickers is emtpy");
@@ -236,6 +256,7 @@
             })
             ;
         }
+
         function getTransaction() {
             if ($('#btnTransactions').val() == "Show Transactions") {
                 $.ajax({
@@ -316,6 +337,31 @@
             }
         }
 
+        function getStockPrice() {
+            if ("" == $("#txtTicker").val()) {
+                alert("Tickers is emtpy");
+            }
+            if ("" == $("#datetimepicker").val()) {
+                alert("DateTime is emtpy");
+            }
+            $.ajax({
+                type: "GET",
+                url: "/price",
+                data: {
+                    startDate: $('#datetimepicker').val(),
+                    accountId: $("#txtAccountId").val(),
+                    selectedSymbol: $("#txtTicker").val(),
+                },
+                success: function (data) {
+                    alert(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.responseText);
+                }
+            })
+            ;
+        }
+
     </script>
 </head>
 <body>
@@ -323,11 +369,20 @@
 <input type="hidden" id="txtSortDirection"/>
 <input type="checkbox" name="selectedAll" id="selectedAll" hidden="hidden"/>
 <input type="hidden" id="txtAccountId" th:value="${accountId}"/>
+
 <table>
     <tr>
         <td colspan="2">
             Tickers: <input type="text" id="txtTicker" value="" size="60"/><input type="hidden" id="hidTicker" value=""
                                                                                   size="60"/>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <div class="col-sm-12 top-buffer">
+                <input type="text" id="datetimepicker"/>
+                <input type="button" value="Get Price" id="btnPrice" th:onclick="'getStockPrice();'"/>
+            </div>
         </td>
     </tr>
     <tr>

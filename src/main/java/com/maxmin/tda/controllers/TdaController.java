@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 @Controller
 public class TdaController {
@@ -105,11 +106,17 @@ public class TdaController {
 
     @GetMapping(value = "orders")
     public ModelAndView getOrders(HttpServletRequest request) {
-        String startDate = request.getParameter("startDate");
         ModelAndView model = new ModelAndView("orders");
         List<Order> list = tdaClient.getOrders(request.getParameter("accountId"));
         model.addObject("orderList", list);
         return model;
+    }
+
+    @GetMapping(value = "price")
+    public String getPrice(HttpServletRequest request, TimeZone zone) {
+        String startDate = request.getParameter("startDate");
+        String stock = request.getParameter("selectedSymbol");
+        return tdaClient.getPrice(startDate, stock, zone);
     }
 
     @GetMapping(value = "/")
