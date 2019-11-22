@@ -353,7 +353,7 @@
                     selectedSymbol: $("#txtTicker").val(),
                 },
                 success: function (data) {
-                    alert(data);
+                    $("#priceResult").empty().append(data);
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     alert(XMLHttpRequest.responseText);
@@ -378,10 +378,14 @@
         </td>
     </tr>
     <tr>
-        <td colspan="2">
+        <td>
             <div class="col-sm-12 top-buffer">
                 <input type="text" id="datetimepicker"/>
                 <input type="button" value="Get Price" id="btnPrice" th:onclick="'getStockPrice();'"/>
+            </div>
+        </td>
+        <td>
+            <div id="priceResult">
             </div>
         </td>
     </tr>

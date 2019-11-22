@@ -9,6 +9,7 @@ import com.maxmin.tda.dto.TradeResponse;
 import com.maxmin.tda.dto.TradeType;
 import com.maxmin.tda.dto.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -113,10 +114,10 @@ public class TdaController {
     }
 
     @GetMapping(value = "price")
-    public String getPrice(HttpServletRequest request, TimeZone zone) {
+    public ResponseEntity<String> getPrice(HttpServletRequest request, TimeZone zone) {
         String startDate = request.getParameter("startDate");
         String stock = request.getParameter("selectedSymbol");
-        return tdaClient.getPrice(startDate, stock, zone);
+        return ResponseEntity.ok(tdaClient.getPrice(startDate, stock, zone));
     }
 
     @GetMapping(value = "/")
