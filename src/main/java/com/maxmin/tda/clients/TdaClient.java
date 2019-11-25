@@ -233,10 +233,8 @@ public class TdaClient {
         }
         LocalDateTime localDateTime = LocalDateTime.parse(date);
         Long input = localDateTime.toInstant(timeZone.toZoneId().getRules().getOffset(localDateTime)).toEpochMilli();
-        LocalDateTime startDate = LocalDateTime
-                .of(localDateTime.getYear(), localDateTime.getMonth(), localDateTime.getDayOfMonth(), 0, 0);
-        LocalDateTime endDate = LocalDateTime
-                .of(localDateTime.getYear(), localDateTime.getMonth(), localDateTime.getDayOfMonth(), 23, 59);
+        LocalDateTime startDate = localDateTime.minusHours(2);
+        LocalDateTime endDate = localDateTime.plusHours(1);
         String start = String
                 .valueOf(startDate.toInstant(timeZone.toZoneId().getRules().getOffset(startDate)).toEpochMilli());
         String end = String

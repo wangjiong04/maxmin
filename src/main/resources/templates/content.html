@@ -135,6 +135,7 @@
         function buy() {
             if ("" == $("#txtTicker").val()) {
                 alert("Tickers is emtpy");
+                return;
             }
             var favorite = [];
             $.each($("input[name='selectedBox']:checked"), function () {
@@ -161,6 +162,7 @@
         function buyWithAmount() {
             if ("" == $("#txtTicker").val()) {
                 alert("Tickers is emtpy");
+                return;
             }
             var favorite = [];
             $.each($("input[name='selectedBox']:checked"), function () {
@@ -187,6 +189,7 @@
         function sellWithAmount() {
             if ("" == $("#txtTicker").val()) {
                 alert("Tickers is emtpy");
+                return;
             }
             var favorite = [];
             $.each($("input[name='selectedBox']:checked"), function () {
@@ -213,6 +216,7 @@
         function sell() {
             if ("" == $("#txtTicker").val()) {
                 alert("Tickers is emtpy");
+                return;
             }
             var favorite = [];
             $.each($("input[name='selectedBox']:checked"), function () {
@@ -239,6 +243,7 @@
         function sellAll() {
             if ("" == $("#txtTicker").val()) {
                 alert("Tickers is emtpy");
+                return;
             }
             $.ajax({
                 type: "POST",
@@ -340,9 +345,15 @@
         function getStockPrice() {
             if ("" == $("#txtTicker").val()) {
                 alert("Tickers is emtpy");
+                return;
+            }
+            if ($("#txtTicker").val().indexOf(",") >= 0) {
+                alert("Only support one stock.");
+                return;
             }
             if ("" == $("#datetimepicker").val()) {
                 alert("DateTime is emtpy");
+                return;
             }
             $.ajax({
                 type: "GET",
