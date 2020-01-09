@@ -8,6 +8,7 @@ import com.maxmin.tda.dto.Quote;
 import com.maxmin.tda.dto.TradeResponse;
 import com.maxmin.tda.dto.TradeType;
 import com.maxmin.tda.dto.Transaction;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -68,7 +69,7 @@ public class TdaController {
                                    RedirectAttributes redirectAttributes) throws IOException {
         List<Quote> list = tdaClient.getQuotes(request.getParameter("accountId"));
         RedirectView redirectView = new RedirectView();
-        String selectedSymbol = request.getParameter("selectedSymbol");
+        String selectedSymbol = processSymbols(request.getParameter("selectedSymbol"));
         redirectAttributes.addFlashAttribute("list", list);
         redirectAttributes.addFlashAttribute("selectedSymbol", selectedSymbol);
         redirectView.setContextRelative(true);
@@ -153,7 +154,7 @@ public class TdaController {
     }
 
     private ModelAndView trade(HttpServletRequest request, TradeType tradeType) throws IOException {
-        String selectedSymbol = request.getParameter("selectedSymbol");
+        String selectedSymbol = processSymbols(request.getParameter("selectedSymbol"));
         String strQuantity = request.getParameter("quantity");
         int quantity = Integer.parseInt(strQuantity);
         List<TradeResponse> result = tdaClient
@@ -164,7 +165,7 @@ public class TdaController {
     }
 
     private ModelAndView tradeAll(HttpServletRequest request) throws IOException {
-        String selectedSymbol = request.getParameter("selectedSymbol");
+        String selectedSymbol = processSymbols(request.getParameter("selectedSymbol"));
         List<TradeResponse> result = tdaClient
                 .sellAll(selectedSymbol, request.getParameter("accountId"));
         ModelAndView model = new ModelAndView("traderesult");
@@ -173,7 +174,7 @@ public class TdaController {
     }
 
     private ModelAndView tradeWithAmount(HttpServletRequest request, TradeType tradeType) throws IOException {
-        String selectedSymbol = request.getParameter("selectedSymbol");
+        String selectedSymbol = processSymbols(request.getParameter("selectedSymbol"));
         String strAmount = request.getParameter("amount");
         double amount = Integer.parseInt(strAmount);
         List<TradeResponse> result = tdaClient
@@ -181,5 +182,10 @@ public class TdaController {
         ModelAndView model = new ModelAndView("traderesult");
         model.addObject("traderesult", result);
         return model;
+    }
+
+    private String processSymbols(String symbols){
+        String result= StringUtils.normalizeSpace(symbols);
+        return result.replace(" ",",");
     }
 }
