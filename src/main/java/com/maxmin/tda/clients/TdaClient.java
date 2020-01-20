@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxmin.tda.dto.Account;
+import com.maxmin.tda.dto.ChildStrategy;
+import com.maxmin.tda.dto.LimitTradeRequest;
 import com.maxmin.tda.dto.Order;
 import com.maxmin.tda.dto.OrderLeg;
+import com.maxmin.tda.dto.OrderStrategy;
+import com.maxmin.tda.dto.OrderType;
 import com.maxmin.tda.dto.Position;
 import com.maxmin.tda.dto.PriceDto;
 import com.maxmin.tda.dto.PriceResult;
@@ -96,6 +100,53 @@ public class TdaClient {
             }
         }
         return quotes;
+    }
+
+    public List<TradeResponse> stockTradeWithOCO(String symbols, int quantity, double gain, double loss,
+                                                 TradeType tradeType, String accountId,
+                                                 OrderType orderType) throws IOException {
+        String accessToken = getAccessToken();
+        if (StringUtils.isEmpty(accessToken)) {
+            return Collections.emptyList();
+        }
+        List<Quote> list = getQuoteBySymbols(symbols);
+        Map<String, Position> accountStock = getAccountStock(accountId);
+
+        String transactionsUrl = "https://api.tdameritrade.com/v1/accounts/" + accountId + "/orders";
+        HttpHeaders headers = getHeader(accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        List<TradeResponse> responseList = new ArrayList<>();
+        for (Quote quote : list
+        ) {
+            RestTemplate restTemplate = new RestTemplate();
+            LimitTradeRequest tradeRequest = new LimitTradeRequest();
+            tradeRequest.setPrice(quote.getAskPrice());
+            OrderLeg orderLeg = createOrderLeg(accountStock, quote.getSymbol(), tradeType, quantity);
+            tradeRequest.getOrderLegCollection().add(orderLeg);
+            tradeRequest.setOrderType(orderType.name());
+            OrderStrategy orderStrategy = new OrderStrategy();
+
+            ChildStrategy childStrategy1 = new ChildStrategy();
+            childStrategy1.setPrice(quote.getAskPrice() * (1 + gain / 100));
+            OrderLeg orderLeg1 = createOrderLeg(accountStock, quote.getSymbol(), TradeType.SELL, quantity);
+            childStrategy1.getOrderLegCollection().add(orderLeg1);
+            orderStrategy.getChildOrderStrategies().add(childStrategy1);
+
+            ChildStrategy childStrategy2 = new ChildStrategy();
+            childStrategy2.setPrice(quote.getAskPrice() * (1 - loss / 100));
+            OrderLeg orderLeg2 = createOrderLeg(accountStock, quote.getSymbol(), TradeType.SELL, quantity);
+            childStrategy2.getOrderLegCollection().add(orderLeg2);
+            orderStrategy.getChildOrderStrategies().add(childStrategy2);
+            tradeRequest.getChildOrderStrategies().add(orderStrategy);
+
+            HttpEntity entity = new HttpEntity<>(tradeRequest, headers);
+            ResponseEntity<String> response = restTemplate
+                    .exchange(transactionsUrl, HttpMethod.POST, entity, String.class);
+            responseList.add(new TradeResponse(quote.getSymbol(), quantity, response.getStatusCode().name(),
+                    response.getBody()));
+            //quote.getHighPrice();
+        }
+        return responseList;
     }
 
     public List<TradeResponse> stockTradeWithAmount(String symbols, double amount,

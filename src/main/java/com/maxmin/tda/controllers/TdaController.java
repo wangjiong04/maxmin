@@ -4,6 +4,7 @@ import com.maxmin.tda.clients.TdaClient;
 import com.maxmin.tda.dto.Account;
 import com.maxmin.tda.dto.Config;
 import com.maxmin.tda.dto.Order;
+import com.maxmin.tda.dto.OrderType;
 import com.maxmin.tda.dto.Quote;
 import com.maxmin.tda.dto.TradeResponse;
 import com.maxmin.tda.dto.TradeType;
@@ -138,6 +139,16 @@ public class TdaController {
         return tradeWithAmount(request, TradeType.BUY);
     }
 
+    @PostMapping(value = "/btnBuyLimitOCO")
+    public ModelAndView buyWithLimitOCO(HttpServletRequest request) throws IOException {
+        return tradeWithOCO(request, TradeType.BUY, OrderType.LIMIT);
+    }
+
+    @PostMapping(value = "/btnBuyMarketOCO")
+    public ModelAndView buyWithMarketOCO(HttpServletRequest request) throws IOException {
+        return tradeWithOCO(request, TradeType.BUY, OrderType.MARKET);
+    }
+
     @PostMapping(value = "/sellWithAmount")
     public ModelAndView sellWithAmount(HttpServletRequest request) throws IOException {
         return tradeWithAmount(request, TradeType.SELL);
@@ -184,8 +195,25 @@ public class TdaController {
         return model;
     }
 
-    private String processSymbols(String symbols){
-        String result= StringUtils.normalizeSpace(symbols);
-        return result.replace(" ",",");
+    private ModelAndView tradeWithOCO(HttpServletRequest request, TradeType tradeType,
+                                      OrderType orderType) throws IOException {
+        String selectedSymbol = processSymbols(request.getParameter("selectedSymbol"));
+        String strGain = request.getParameter("gain");
+        String strLoss = request.getParameter("loss");
+        String strQuantity = request.getParameter("quantity");
+        double gain = Integer.parseInt(strGain);
+        double loss = Integer.parseInt(strLoss);
+        int quantity = Integer.parseInt(strQuantity);
+        List<TradeResponse> result = tdaClient
+                .stockTradeWithOCO(selectedSymbol, quantity, gain, loss, tradeType, request.getParameter("accountId"),
+                        orderType);
+        ModelAndView model = new ModelAndView("traderesult");
+        model.addObject("traderesult", result);
+        return model;
+    }
+
+    private String processSymbols(String symbols) {
+        String result = StringUtils.normalizeSpace(symbols);
+        return result.replace(" ", ",");
     }
 }

@@ -186,6 +186,64 @@
             ;
         }
 
+        function btnBuyLimitOCO() {
+            if ("" == $("#txtTicker").val()) {
+                alert("Tickers is emtpy");
+                return;
+            }
+            var favorite = [];
+            $.each($("input[name='selectedBox']:checked"), function () {
+                favorite.push($(this).val());
+            });
+            $.ajax({
+                type: "POST",
+                url: "/btnBuyLimitOCO",
+                data: {
+                    selectedSymbol: $("#txtTicker").val(),
+                    gain: $("#txtGainPercent").val(),
+                    loss: $("#txtLossPercent").val(),
+                    quantity: $("#txtQuantity").val(),
+                    accountId: $("#txtAccountId").val()
+                },
+                success: function (data) {
+                    $("#traderesult").empty().append(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.responseText);
+                }
+            })
+            ;
+        }
+
+        function btnBuyMarketOCO() {
+            if ("" == $("#txtTicker").val()) {
+                alert("Tickers is emtpy");
+                return;
+            }
+            var favorite = [];
+            $.each($("input[name='selectedBox']:checked"), function () {
+                favorite.push($(this).val());
+            });
+            $.ajax({
+                type: "POST",
+                url: "/btnBuyMarketOCO",
+                data: {
+                    selectedSymbol: $("#txtTicker").val(),
+                    gain: $("#txtGainPercent").val(),
+                    loss: $("#txtLossPercent").val(),
+                    quantity: $("#txtQuantity").val(),
+                    accountId: $("#txtAccountId").val()
+                },
+                success: function (data) {
+                    $("#traderesult").empty().append(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.responseText);
+                }
+            })
+            ;
+        }
+
         function sellWithAmount() {
             if ("" == $("#txtTicker").val()) {
                 alert("Tickers is emtpy");
@@ -384,8 +442,9 @@
 <table>
     <tr>
         <td colspan="2">
-            Tickers: <input type="text" id="txtTicker" value="" style="width:300px"/><input type="hidden" id="hidTicker" value=""
-                                                                                  size="60"/>
+            Tickers: <input type="text" id="txtTicker" value="" style="width:300px"/><input type="hidden" id="hidTicker"
+                                                                                            value=""
+                                                                                            size="60"/>
         </td>
     </tr>
     <tr>
@@ -400,11 +459,11 @@
             </div>
         </td>
     </tr>
-    <tr hidden="hidden" >
+    <tr hidden="hidden">
         <td>Action with Quantity:
         </td>
         <td>
-            <input type="text" id="txtQuantity" value="1" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
+
             <input type="button" value="Sell with Quantity" id="btnSell" th:onclick="'sell();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" value="Buy with Quantity" id="btnBuy" th:onclick="'buy();'"/>
         </td>
@@ -415,6 +474,17 @@
             <input type="text" id="txtAmount" value="1" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" value="Buy with Amount" id="btnBuyAmount" th:onclick="'buyWithAmount();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" value="Sell with Amount" id="btnSellAmount" th:onclick="'sellWithAmount();'"/>
+        </td>
+    </tr>
+    <tr>
+        <td>Quantity:
+            <input type="text" id="txtQuantity" value="1" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            Gain Percent:
+            <input type="text" id="txtGainPercent" value="5" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            Loss Percent:
+            <input type="text" id="txtLossPercent" value="2" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Buy Limit OCO" id="btnBuyLimitOCO" th:onclick="'btnBuyLimitOCO();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Buy Market OCO" id="btnBuyMarketOCO" th:onclick="'btnBuyMarketOCO();'"/>
         </td>
     </tr>
     <tr>
