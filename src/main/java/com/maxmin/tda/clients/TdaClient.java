@@ -120,20 +120,22 @@ public class TdaClient {
         ) {
             RestTemplate restTemplate = new RestTemplate();
             LimitTradeRequest tradeRequest = new LimitTradeRequest();
-            tradeRequest.setPrice(quote.getAskPrice());
+            if (orderType == OrderType.LIMIT) {
+                tradeRequest.setPrice(quote.getAskPrice());
+            }
             OrderLeg orderLeg = createOrderLeg(accountStock, quote.getSymbol(), tradeType, quantity);
             tradeRequest.getOrderLegCollection().add(orderLeg);
             tradeRequest.setOrderType(orderType.name());
             OrderStrategy orderStrategy = new OrderStrategy();
 
             ChildStrategy childStrategy1 = new ChildStrategy();
-            childStrategy1.setPrice(quote.getAskPrice() * (1 + gain / 100));
+            childStrategy1.setPrice(formatDouble(quote.getAskPrice() * (1 + gain / 100)));
             OrderLeg orderLeg1 = createOrderLeg(accountStock, quote.getSymbol(), TradeType.SELL, quantity);
             childStrategy1.getOrderLegCollection().add(orderLeg1);
             orderStrategy.getChildOrderStrategies().add(childStrategy1);
 
             ChildStrategy childStrategy2 = new ChildStrategy();
-            childStrategy2.setPrice(quote.getAskPrice() * (1 - loss / 100));
+            childStrategy2.setPrice(formatDouble(quote.getAskPrice() * (1 - loss / 100)));
             OrderLeg orderLeg2 = createOrderLeg(accountStock, quote.getSymbol(), TradeType.SELL, quantity);
             childStrategy2.getOrderLegCollection().add(orderLeg2);
             orderStrategy.getChildOrderStrategies().add(childStrategy2);
@@ -255,6 +257,10 @@ public class TdaClient {
                 .format("https://api.tdameritrade.com/v1/accounts/%s/transactions?type=TRADE&startDate=%s", accountId,
                         getOneWeekBefore());
         return getListResponse(transactionsUrl, accessToken, new ParameterizedTypeReference<List<Transaction>>() {});
+    }
+
+    private double formatDouble(double d) {
+        return (double) Math.round(d * 100) / 100;
     }
 
     private OrderLeg createOrderLeg(Map<String, Position> accountStock, String symbol, TradeType tradeType,
