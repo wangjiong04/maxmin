@@ -21,6 +21,7 @@ import com.maxmin.tda.dto.TradeType;
 import com.maxmin.tda.dto.Transaction;
 import com.maxmin.tda.utils.ObjectMapperFactory;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -52,6 +53,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Data
+@Slf4j
 public class TdaClient {
     @Value("${client_id}")
     private String client_id;
@@ -140,12 +142,15 @@ public class TdaClient {
             childStrategy2.getOrderLegCollection().add(orderLeg2);
             orderStrategy.getChildOrderStrategies().add(childStrategy2);
             tradeRequest.getChildOrderStrategies().add(orderStrategy);
-
-            HttpEntity entity = new HttpEntity<>(tradeRequest, headers);
-            ResponseEntity<String> response = restTemplate
-                    .exchange(transactionsUrl, HttpMethod.POST, entity, String.class);
-            responseList.add(new TradeResponse(quote.getSymbol(), quantity, response.getStatusCode().name(),
-                    response.getBody()));
+            try {
+                HttpEntity entity = new HttpEntity<>(tradeRequest, headers);
+                ResponseEntity<String> response = restTemplate
+                        .exchange(transactionsUrl, HttpMethod.POST, entity, String.class);
+                responseList.add(new TradeResponse(quote.getSymbol(), quantity, response.getStatusCode().name(),
+                        response.getBody()));
+            } catch (Exception ex) {
+                log.error("error for: " + quote.getSymbol(), ex);
+            }
             //quote.getHighPrice();
         }
         return responseList;
@@ -174,10 +179,14 @@ public class TdaClient {
             OrderLeg orderLeg = createOrderLeg(accountStock, quote.getSymbol(), tradeType, quantity);
             tradeRequest.getOrderLegCollection().add(orderLeg);
             HttpEntity entity = new HttpEntity<>(tradeRequest, headers);
-            ResponseEntity<String> response = restTemplate
-                    .exchange(transactionsUrl, HttpMethod.POST, entity, String.class);
-            responseList.add(new TradeResponse(quote.getSymbol(), quantity, response.getStatusCode().name(),
-                    response.getBody()));
+            try {
+                ResponseEntity<String> response = restTemplate
+                        .exchange(transactionsUrl, HttpMethod.POST, entity, String.class);
+                responseList.add(new TradeResponse(quote.getSymbol(), quantity, response.getStatusCode().name(),
+                        response.getBody()));
+            } catch (Exception ex) {
+                log.error("error for: " + quote.getSymbol(), ex);
+            }
             //quote.getHighPrice();
         }
         return responseList;
@@ -204,10 +213,14 @@ public class TdaClient {
             OrderLeg orderLeg = createOrderLeg(accountStock, quote.getSymbol(), tradeType, quantity);
             tradeRequest.getOrderLegCollection().add(orderLeg);
             HttpEntity entity = new HttpEntity<>(tradeRequest, headers);
-            ResponseEntity<String> response = restTemplate
-                    .exchange(transactionsUrl, HttpMethod.POST, entity, String.class);
-            responseList.add(new TradeResponse(quote.getSymbol(), quantity, response.getStatusCode().name(),
-                    response.getBody()));
+            try {
+                ResponseEntity<String> response = restTemplate
+                        .exchange(transactionsUrl, HttpMethod.POST, entity, String.class);
+                responseList.add(new TradeResponse(quote.getSymbol(), quantity, response.getStatusCode().name(),
+                        response.getBody()));
+            } catch (Exception ex) {
+                log.error("error for: " + quote.getSymbol(), ex);
+            }
             //quote.getHighPrice();
         }
         return responseList;
@@ -236,12 +249,16 @@ public class TdaClient {
                         accountStock.get(quote.getSymbol()).getLongQuantity().intValue());
                 tradeRequest.getOrderLegCollection().add(orderLeg);
                 HttpEntity entity = new HttpEntity<>(tradeRequest, headers);
-                ResponseEntity<String> response = restTemplate
-                        .exchange(transactionsUrl, HttpMethod.POST, entity, String.class);
-                responseList.add(new TradeResponse(quote.getSymbol(),
-                        accountStock.get(quote.getSymbol()).getLongQuantity().intValue(),
-                        response.getStatusCode().name(),
-                        response.getBody()));
+                try {
+                    ResponseEntity<String> response = restTemplate
+                            .exchange(transactionsUrl, HttpMethod.POST, entity, String.class);
+                    responseList.add(new TradeResponse(quote.getSymbol(),
+                            accountStock.get(quote.getSymbol()).getLongQuantity().intValue(),
+                            response.getStatusCode().name(),
+                            response.getBody()));
+                } catch (Exception ex) {
+                    log.error("error for: " + quote.getSymbol(), ex);
+                }
                 //quote.getHighPrice();
             }
         }
