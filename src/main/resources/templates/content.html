@@ -441,10 +441,17 @@
 
 <table>
     <tr>
-        <td colspan="2">
-            Tickers: <input type="text" id="txtTicker" value="" style="width:300px"/><input type="hidden" id="hidTicker"
-                                                                                            value=""
-                                                                                            size="60"/>
+
+        <td align="left" width="80%">
+            <div class="col-sm-12 top-buffer">
+                Tickers: <input type="text" id="txtTicker" value="" style="width:300px"/><input type="hidden"
+                                                                                                id="hidTicker"
+                                                                                                value=""
+                                                                                                size="60"/>
+            </div>
+        </td>
+        <td align="right" width="20%">
+            <a href="/">Log out</a>
         </td>
     </tr>
     <tr>
@@ -469,8 +476,7 @@
         </td>
     </tr>
     <tr>
-        <td>Action with Amount:</td>
-        <td>
+        <td colspan="2">Action with Amount:&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="text" id="txtAmount" value="1" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" value="Buy with Amount" id="btnBuyAmount" th:onclick="'buyWithAmount();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" value="Sell with Amount" id="btnSellAmount" th:onclick="'sellWithAmount();'"/>
@@ -494,8 +500,7 @@
         </td>
     </tr>
     <tr>
-        <td> Other Tables</td>
-        <td>
+        <td colspan="2"> Other Tables: &nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" value="Show Transactions" id="btnTransactions" th:onclick="'getTransaction();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" value="Show Orders" id="btnOrders" th:onclick="'getOrders();'"/>
         </td>
@@ -519,6 +524,24 @@
 <div id="loading">
     <p><img th:src="@{img/ajax-loader.gif}" width="32" src="../static/img/ajax-loader.gif" alt=""/> Please Wait</p>
 </div>
+<table>
+    <tr>
+        <td colspan="2" style="font-size: 12px;font-weight: bold">
+            <br/><br/>
+            <b>Disclaimer</b><br/>
+
+            This app is an effort to help you accelerate your trade speed using legal TD Ameritrade
+            Technologies.<br/>
+
+            No positive results or implied warranties are being made with respect to these services and
+            products.<br/>
+
+            All investing and trading in the securities market will involve risk.<br/>
+
+            Any decisions to place trades in stock is a your personal decision at your own risk.
+        </td>
+    </tr>
+</table>
 </body>
 
 </html>
