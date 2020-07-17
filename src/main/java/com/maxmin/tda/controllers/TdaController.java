@@ -2,6 +2,7 @@ package com.maxmin.tda.controllers;
 
 import com.maxmin.tda.clients.TdaClient;
 import com.maxmin.tda.dto.Account;
+import com.maxmin.tda.dto.CalculateDto;
 import com.maxmin.tda.dto.Config;
 import com.maxmin.tda.dto.Order;
 import com.maxmin.tda.dto.OrderType;
@@ -27,10 +28,12 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 @Controller
 public class TdaController {
@@ -162,6 +165,37 @@ public class TdaController {
     @PostMapping(value = "/sellAll")
     public ModelAndView sellAll(HttpServletRequest request) throws IOException {
         return tradeAll(request);
+    }
+
+    @PostMapping(value = "/calculate")
+    public ModelAndView calculate(HttpServletRequest request) throws IOException {
+        String txt1 = processSymbols(request.getParameter("txt1"));
+        String txt2 = processSymbols(request.getParameter("txt2"));
+//        List<TradeResponse> result = tdaClient
+//                .stockTrade(selectedSymbol, quantity, tradeType, request.getParameter("accountId"));
+        ModelAndView model = new ModelAndView("calculateResult");
+        List<CalculateDto> calculateDtos = Arrays.stream(txt2.split(";")).map(CalculateDto::of).collect(Collectors.toList());
+        List<String> headers = calculateDtos.stream().map(CalculateDto::getSymbol).collect(Collectors.toList());
+
+        List<Map<String, String>> rows = calculate(headers, calculateDtos, txt1);
+
+        model.addObject("headers", headers);
+        model.addObject("rows", rows);
+        return model;
+    }
+
+    private List<Map<String, String>> calculate(List<String> headers, List<CalculateDto> calculateDtos, String symbol) throws IOException {
+        headers.add(0, symbol);
+        calculateDtos.add(0, new CalculateDto(symbol));
+        List<Quote> quotes = this.tdaClient.getQuoteBySymbols(headers.stream().collect(Collectors.joining(",")));
+        
+        headers.add(0, "Difference");
+        calculateDtos.add(0, new CalculateDto("Difference"));
+        Map<String, String> mapRow = calculateDtos.stream().collect(Collectors.toMap(CalculateDto::getSymbol, CalculateDto::getResult));
+
+        List<Map<String, String>> rows = new ArrayList<>();
+        rows.add(mapRow);
+        return rows;
     }
 
     private ModelAndView trade(HttpServletRequest request, TradeType tradeType) throws IOException {

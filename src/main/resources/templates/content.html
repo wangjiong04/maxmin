@@ -431,6 +431,33 @@
             ;
         }
 
+        function calculate() {
+            if ("" == $("#txt1").val()) {
+                alert("Textbox1 is emtpy");
+                return;
+            }
+            if ("" == $("#txt2").val()) {
+                alert("Textbox2 is emtpy");
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "/calculate",
+                data: {
+                    txt1: $("#txt1").val(),
+                    txt2: $("#txt2").val(),
+                    accountId: $("#txtAccountId").val()
+                },
+                success: function (data) {
+                    $("#calculateResult").empty().append(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.responseText);
+                }
+            })
+            ;
+        }
     </script>
 </head>
 <body>
@@ -438,110 +465,123 @@
 <input type="hidden" id="txtSortDirection"/>
 <input type="checkbox" name="selectedAll" id="selectedAll" hidden="hidden"/>
 <input type="hidden" id="txtAccountId" th:value="${accountId}"/>
+<div class="col-sm-12 top-buffer">
+    <table border="0" width="100%">
+        <tr>
 
-<table>
-    <tr>
+            <td align="left" width="90%">
 
-        <td align="left" width="80%">
-            <div class="col-sm-12 top-buffer">
                 Tickers: <input type="text" id="txtTicker" value="" style="width:300px"/><input type="hidden"
                                                                                                 id="hidTicker"
                                                                                                 value=""
                                                                                                 size="60"/>
-            </div>
-        </td>
-        <td align="right" width="20%">
-            <a href="/">Log out</a>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <div class="col-sm-12 top-buffer">
+
+            </td>
+            <td align="right" width="10%">
+                <a href="/">Log out</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+
                 <input type="text" id="datetimepicker"/>
                 <input type="button" value="Get Price" id="btnPrice" th:onclick="'getStockPrice();'"/>
-            </div>
-        </td>
-        <td>
-            <div id="priceResult">
-            </div>
-        </td>
-    </tr>
-    <tr hidden="hidden">
-        <td>Action with Quantity:
-        </td>
-        <td>
 
-            <input type="button" value="Sell with Quantity" id="btnSell" th:onclick="'sell();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="button" value="Buy with Quantity" id="btnBuy" th:onclick="'buy();'"/>
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2">Action with Amount:&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="text" id="txtAmount" value="1" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="button" value="Buy with Amount" id="btnBuyAmount" th:onclick="'buyWithAmount();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="button" value="Sell with Amount" id="btnSellAmount" th:onclick="'sellWithAmount();'"/>
-        </td>
-    </tr>
-    <tr>
-        <td>Quantity:
-            <input type="text" id="txtQuantity" value="1" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            Gain Percent:
-            <input type="text" id="txtGainPercent" value="5" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            Loss Percent:
-            <input type="text" id="txtLossPercent" value="2" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="button" value="Buy Limit OCO" id="btnBuyLimitOCO" th:onclick="'btnBuyLimitOCO();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="button" value="Buy Market OCO" id="btnBuyMarketOCO" th:onclick="'btnBuyMarketOCO();'"/>
-        </td>
-    </tr>
-    <tr>
-        <td><input type="button" value="     Sell All     " id="btnSellAll" th:onclick="'sellAll();'"/></td>
-        <td>
-            &nbsp;&nbsp;&nbsp;&nbsp;
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2"> Other Tables: &nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="button" value="Show Transactions" id="btnTransactions" th:onclick="'getTransaction();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="button" value="Show Orders" id="btnOrders" th:onclick="'getOrders();'"/>
-        </td>
-    </tr>
+            </td>
+            <td>
+                <div id="priceResult">
+                </div>
+            </td>
+        </tr>
+        <tr hidden="hidden">
+            <td>Action with Quantity:
+            </td>
+            <td>
 
-</table>
-<br/>
-<hr width="100%"/>
-<div id="result">
+                <input type="button" value="Sell with Quantity" id="btnSell" th:onclick="'sell();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="button" value="Buy with Quantity" id="btnBuy" th:onclick="'buy();'"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">Action with Amount:&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="text" id="txtAmount" value="1" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="button" value="Buy with Amount" id="btnBuyAmount" th:onclick="'buyWithAmount();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="button" value="Sell with Amount" id="btnSellAmount" th:onclick="'sellWithAmount();'"/>
+            </td>
+        </tr>
+        <tr>
+            <td>Quantity:
+                <input type="text" id="txtQuantity" value="1" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                Gain Percent:
+                <input type="text" id="txtGainPercent" value="5" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                Loss Percent:
+                <input type="text" id="txtLossPercent" value="2" size="4"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="button" value="Buy Limit OCO" id="btnBuyLimitOCO" th:onclick="'btnBuyLimitOCO();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="button" value="Buy Market OCO" id="btnBuyMarketOCO" th:onclick="'btnBuyMarketOCO();'"/>
+            </td>
+        </tr>
+        <tr>
+            <td><input type="button" value="     Sell All     " id="btnSellAll" th:onclick="'sellAll();'"/></td>
+            <td>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2"> Other Tables: &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="button" value="Show Transactions" id="btnTransactions" th:onclick="'getTransaction();'"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="button" value="Show Orders" id="btnOrders" th:onclick="'getOrders();'"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="text" id="txt1" value="FNGU" style="width:80px"/>&nbsp;
+                <input type="text" id="txt2"
+                       value="AAPL_0.099;AMZN_0.0915;BABA_0.0955;BIDU_0.0897;FB_0.0982;GOOGL_0.0974;NFLX_0.0918;NVDA_0.0855;TSLA_0.1217;TWTR_0.1288"
+                       style="width:1000px"/>
+                <input type="button" value="Calculate" id="btnCalculate" th:onclick="'calculate();'"/>
+            </td>
+        </tr>
+    </table>
 
+    <br/>
+    <hr width="100%"/>
+    <div id="result">
+
+    </div>
+    <div id="traderesult">
+
+    </div>
+    <div id="transactionResult">
+
+    </div>
+    <div id="calculateResult">
+
+    </div>
+    <div id="orders">
+
+    </div>
+    <div id="loading">
+        <p><img th:src="@{img/ajax-loader.gif}" width="32" src="../static/img/ajax-loader.gif" alt=""/> Please Wait</p>
+    </div>
+    <table>
+        <tr>
+            <td colspan="2" style="font-size: 12px;font-weight: bold">
+                <br/><br/>
+                <b>Disclaimer</b><br/>
+
+                This app is an effort to help you accelerate your trade speed using legal TD Ameritrade
+                Technologies.<br/>
+
+                No positive results or implied warranties are being made with respect to these services and
+                products.<br/>
+
+                All investing and trading in the securities market will involve risk.<br/>
+
+                Any decisions to place trades in stock is your personal decision at your own risk.
+            </td>
+        </tr>
+    </table>
 </div>
-<div id="traderesult">
-
-</div>
-<div id="transactionResult">
-
-</div>
-<div id="orders">
-
-</div>
-<div id="loading">
-    <p><img th:src="@{img/ajax-loader.gif}" width="32" src="../static/img/ajax-loader.gif" alt=""/> Please Wait</p>
-</div>
-<table>
-    <tr>
-        <td colspan="2" style="font-size: 12px;font-weight: bold">
-            <br/><br/>
-            <b>Disclaimer</b><br/>
-
-            This app is an effort to help you accelerate your trade speed using legal TD Ameritrade
-            Technologies.<br/>
-
-            No positive results or implied warranties are being made with respect to these services and
-            products.<br/>
-
-            All investing and trading in the securities market will involve risk.<br/>
-
-            Any decisions to place trades in stock is your personal decision at your own risk.
-        </td>
-    </tr>
-</table>
 </body>
 
 </html>

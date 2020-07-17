@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>result</title>
+</head>
+<body>
+<hr width="100%"/>
+Calculate Result:<br/>
+<table class="stripe" id="tblCalculate" width="80%">
+    <thead>
+    <tr>
+        <th th:each="header: ${headers}" th:text="${header}"/>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="row: ${rows}">
+        <td th:each="header: ${headers}" th:text="${row.get(header)}"/>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

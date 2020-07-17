@@ -273,7 +273,8 @@ public class TdaClient {
         String transactionsUrl = String
                 .format("https://api.tdameritrade.com/v1/accounts/%s/transactions?type=TRADE&startDate=%s", accountId,
                         getOneWeekBefore());
-        return getListResponse(transactionsUrl, accessToken, new ParameterizedTypeReference<List<Transaction>>() {});
+        return getListResponse(transactionsUrl, accessToken, new ParameterizedTypeReference<List<Transaction>>() {
+        });
     }
 
     private double formatDouble(double d) {
@@ -297,7 +298,8 @@ public class TdaClient {
         String transactionsUrl = String
                 .format("https://api.tdameritrade.com/v1/accounts/%s/orders?fromEnteredTime=%s&toEnteredTime=%s",
                         accountId, getOneWeekBefore(), getCurrentDate());
-        return getListResponse(transactionsUrl, accessToken, new ParameterizedTypeReference<List<Order>>() {});
+        return getListResponse(transactionsUrl, accessToken, new ParameterizedTypeReference<List<Order>>() {
+        });
     }
 
     public String getPrice(String date, String stock, TimeZone timeZone) {
@@ -317,7 +319,8 @@ public class TdaClient {
                 .format("https://api.tdameritrade.com/v1/marketdata/%s/pricehistory?periodType=day&frequencyType=minute&frequency=1&startDate=%s&endDate=%s",
                         stock, start, end);
         PriceResult response = getResponse(searchUrl, accessToken,
-                new ParameterizedTypeReference<PriceResult>() {});
+                new ParameterizedTypeReference<PriceResult>() {
+                });
         List<PriceDto> priceDtos = response.getCandles().stream().filter(e -> e.getDatetime() < input)
                 .collect(Collectors.toList());
         return priceDtos.get(priceDtos.size() - 1).getHigh().toString();
@@ -329,7 +332,8 @@ public class TdaClient {
             return Collections.emptyList();
         }
         String transactionsUrl = "https://api.tdameritrade.com/v1/accounts?fields=positions";
-        return getListResponse(transactionsUrl, accessToken, new ParameterizedTypeReference<List<Account>>() {});
+        return getListResponse(transactionsUrl, accessToken, new ParameterizedTypeReference<List<Account>>() {
+        });
     }
 
     private <T> List<T> getListResponse(String transactionsUrl, String accessToken,
@@ -373,7 +377,7 @@ public class TdaClient {
     }
 
 
-    private List<Quote> getQuoteBySymbols(String symbols) throws IOException {
+    public List<Quote> getQuoteBySymbols(String symbols) throws IOException {
         String accessToken = getAccessToken();
         if (StringUtils.isEmpty(accessToken)) {
             return Collections.emptyList();
