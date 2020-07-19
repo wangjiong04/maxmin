@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Controller
@@ -171,8 +172,6 @@ public class TdaController {
     public ModelAndView calculate(HttpServletRequest request) throws IOException {
         String txt1 = processSymbols(request.getParameter("txt1"));
         String txt2 = processSymbols(request.getParameter("txt2"));
-//        List<TradeResponse> result = tdaClient
-//                .stockTrade(selectedSymbol, quantity, tradeType, request.getParameter("accountId"));
         ModelAndView model = new ModelAndView("calculateResult");
         List<CalculateDto> calculateDtos = Arrays.stream(txt2.split(";")).map(CalculateDto::of).collect(Collectors.toList());
         List<String> headers = calculateDtos.stream().map(CalculateDto::getSymbol).collect(Collectors.toList());
@@ -183,14 +182,23 @@ public class TdaController {
         model.addObject("rows", rows);
         return model;
     }
-
+    private Double formatDouble(double d) {
+        return (double) Math.round(d * 100) / 100;
+    }
     private List<Map<String, String>> calculate(List<String> headers, List<CalculateDto> calculateDtos, String symbol) throws IOException {
         headers.add(0, symbol);
-        calculateDtos.add(0, new CalculateDto(symbol));
-        List<Quote> quotes = this.tdaClient.getQuoteBySymbols(headers.stream().collect(Collectors.joining(",")));
-        
-        headers.add(0, "Difference");
-        calculateDtos.add(0, new CalculateDto("Difference"));
+        Map<String,Quote> stockMap=this.tdaClient.getQuoteBySymbols(headers.stream().collect(Collectors.joining(","))).stream().collect(Collectors.toMap(Quote::getSymbol,Function.identity()));
+        calculateDtos.forEach(calculateDto -> {
+            Quote quote=stockMap.get(calculateDto.getSymbol());
+            calculateDto.setResult(formatDouble (quote.getHighPrice()-quote.getClosePrice()*100*Double.parseDouble(calculateDto.getAmount())/quote.getClosePrice()).toString());
+        });
+        CalculateDto calculateDto= new CalculateDto(symbol);
+        Quote quote=stockMap.get(symbol);
+        calculateDto.setResult(formatDouble((quote.getHighPrice()-quote.getClosePrice())*100/quote.getClosePrice()).toString());
+        calculateDtos.add(0, calculateDto);
+//        headers.add(0, "Difference");
+//        calculateDto= new CalculateDto("Difference");
+//        calculateDtos.add(0,calculateDto);
         Map<String, String> mapRow = calculateDtos.stream().collect(Collectors.toMap(CalculateDto::getSymbol, CalculateDto::getResult));
 
         List<Map<String, String>> rows = new ArrayList<>();
