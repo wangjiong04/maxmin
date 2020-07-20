@@ -22,65 +22,66 @@
 <div>
     <form th:action="@{/redirectPage}"
           method="post" th:object="${config}">
+        <div class="col-sm-12 top-buffer">
+            <table>
+                <tr hidden="hidden">
+                    <td>
+                        <label>response_type</label>
+                    </td>
+                    <td>
+                        <input type="text" name="response_type" value="code"/>
+                    </td>
+                </tr>
+                <tr hidden="hidden">
+                    <td>
+                        <label>client_id</label>
+                    </td>
+                    <td>
+                        <input type="text" name="client_id" th:value="*{client_id}" style="width:300px"/>
+                    </td>
+                </tr>
+                <tr hidden="hidden">
+                    <td>
+                        <label>redirect_uri</label>
+                    </td>
+                    <td>
+                        <input type="text" name="redirect_uri"
+                               th:value="*{redirect_uri}"
+                               style="width:500px"/>
+                    </td>
+                </tr>
 
-        <table>
-            <tr hidden="hidden">
-                <td>
-                    <label>response_type</label>
-                </td>
-                <td>
-                    <input type="text" name="response_type" value="code"/>
-                </td>
-            </tr>
-            <tr hidden="hidden">
-                <td>
-                    <label>client_id</label>
-                </td>
-                <td>
-                    <input type="text" name="client_id" th:value="*{client_id}" style="width:300px"/>
-                </td>
-            </tr>
-            <tr hidden="hidden">
-                <td>
-                    <label>redirect_uri</label>
-                </td>
-                <td>
-                    <input type="text" name="redirect_uri"
-                           th:value="*{redirect_uri}"
-                           style="width:500px"/>
-                </td>
-            </tr>
+                <tr>
+                    <td>
+                        <input type="SUBMIT" value="      Start      "/>
+                    </td>
+                    <td>
 
-            <tr>
-                <td>
-                    <input type="SUBMIT" value="      Start      "/>
-                </td>
-                <td>
+                    </td>
+                </tr>
 
-                </td>
-            </tr>
+                <tr>
+                    <td colspan="2" style="font-size: 12px;font-weight: bold">
+                        <br/><br/>
+                        <b>Disclaimer</b><br/>
 
-            <tr>
-                <td colspan="2" style="font-size: 12px;font-weight: bold">
-                    <br/><br/>
-                    <b>Disclaimer</b><br/>
+                        This app is an effort to help you accelerate your trade speed using legal TD Ameritrade
+                        Technologies.<br/>
 
-                    This app is an effort to help you accelerate your trade speed using legal TD Ameritrade
-                    Technologies.<br/>
+                        No positive results or implied warranties are being made with respect to these services and
+                        products.<br/>
 
-                    No positive results or implied warranties are being made with respect to these services and
-                    products.<br/>
+                        All investing and trading in the securities market will involve risk.<br/>
 
-                    All investing and trading in the securities market will involve risk.<br/>
+                        Any decisions to place trades in stock is your personal decision at your own risk.
+                    </td>
+                </tr>
+                <tr>
 
-                    Any decisions to place trades in stock is your personal decision at your own risk.
-                </td>
-            </tr>
-            <tr>
-
-                <td colspan="2"><br/><br/><a href="../Help.html" target="_blank">Help</a></td>
-            </tr>
-        </table>
+                    <td colspan="2"><br/><br/><a href="../Help.html" target="_blank">Help</a></td>
+                </tr>
+            </table>
+        </div>
     </form>
 </div>
 </body>

@@ -10,7 +10,8 @@ import java.util.Map;
 public class CalculateDto {
     private String symbol;
     private String amount;
-    private String result;
+    private String resultString;
+    private double result;
 
     public CalculateDto(String symbol) {
         this.symbol = symbol;
@@ -43,10 +44,10 @@ public class CalculateDto {
 
     public void calculate(double lastPrice, double currentPrice) {
         if (null == amount) {
-            result = formatDouble((currentPrice - lastPrice) * 100 / lastPrice) + "%";
+            resultString = formatDouble((currentPrice - lastPrice) * 100 / lastPrice) + "%";
         } else {
             Double d = Double.parseDouble(amount);
-            result = formatDouble((currentPrice - lastPrice) * d * 100 / lastPrice) + "%";
+            resultString = formatDouble((currentPrice - lastPrice) * d * 100 / lastPrice) + "%";
         }
     }
 }
