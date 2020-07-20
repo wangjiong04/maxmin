@@ -61,6 +61,9 @@ public class TdaClient {
     @Value("${redirect_uri}")
     private String redirect_uri;
 
+    @Value("${server.token}")
+    private String serverToken;
+
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance()
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
@@ -460,7 +463,10 @@ public class TdaClient {
 
     private String getAccessToken() {
         if (null == token) {
-            return "";
+            if (StringUtils.isEmpty(serverToken))
+                return "";
+            else
+                return serverToken;
         }
         if (!isAccessTokenExpired()) {
             return token.getAccess_token();

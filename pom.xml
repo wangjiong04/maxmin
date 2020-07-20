@@ -5,7 +5,7 @@
 
     <groupId>com.maxmin.tda</groupId>
     <artifactId>tda-trade</artifactId>
-    <version>0.0.52</version>
+    <version>0.0.53</version>
     <packaging>jar</packaging>
 
     <name>tda-trade</name>
