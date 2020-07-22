@@ -192,7 +192,7 @@ public class TdaController {
         Map<String, Quote> stockMap = this.tdaClient.getQuoteBySymbols(String.join(",", headers)).stream().collect(Collectors.toMap(Quote::getSymbol, Function.identity()));
         calculateDtos.forEach(calculateDto -> {
             Quote quote = stockMap.get(calculateDto.getSymbol());
-            calculateDto.setResult((quote.getHighPrice() - quote.getClosePrice()) * 100 * Double.parseDouble(calculateDto.getAmount()) / quote.getClosePrice());
+            calculateDto.setResult((quote.getLastPrice() - quote.getClosePrice()) * 100 * Double.parseDouble(calculateDto.getAmount()) / quote.getClosePrice());
             calculateDto.setResultString(formatDouble(calculateDto.getResult()).toString() + "%");
         });
 
@@ -205,7 +205,7 @@ public class TdaController {
 
         calculateDto = new CalculateDto(symbol);
         Quote quote = stockMap.get(symbol);
-        calculateDto.setResult((quote.getHighPrice() - quote.getClosePrice()) * 100 / quote.getClosePrice());
+        calculateDto.setResult((quote.getLastPrice() - quote.getClosePrice()) * 100 / quote.getClosePrice());
         double d2 = calculateDto.getResult();
         calculateDto.setResultString(formatDouble(calculateDto.getResult()).toString() + "%");
         calculateDtos.add(0, calculateDto);

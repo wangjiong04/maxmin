@@ -471,11 +471,16 @@
         <tr>
 
             <td align="left" width="90%">
-
-                Tickers: <input type="text" id="txtTicker" value="" style="width:300px"/><input type="hidden"
-                                                                                                id="hidTicker"
-                                                                                                value=""
-                                                                                                size="60"/>
+                <div class="col-sm-12 top-buffer">
+                    Tickers: <input type="text" id="txtTicker" value="" style="width:300px"/><input type="hidden"
+                                                                                                    id="hidTicker"
+                                                                                                    value=""
+                                                                                                    size="60"/>
+                    &nbsp;&nbsp;&nbsp;
+                    Select Date: <input type="text" id="datetimepicker"/>
+                    <input type="button" value="Get Price" id="btnPrice" th:onclick="'getStockPrice();'"/>
+                    <label id="priceResult"/>
+                </div>
 
             </td>
             <td align="right" width="10%">
@@ -483,14 +488,11 @@
             </td>
         </tr>
         <tr>
-            <td>
-                Select Date:
-                <div class="col-sm-12 top-buffer"><input type="text" id="datetimepicker"/>
-                    <input type="button" value="Get Price" id="btnPrice" th:onclick="'getStockPrice();'"/>
-                </div>
+            <td style="width:80px">
+
             </td>
             <td>
-                <div id="priceResult">
+                <div id="priceResult1">
                 </div>
             </td>
         </tr>

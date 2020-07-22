@@ -11,7 +11,6 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="boot-client-application" target="1.8" />
       <module name="tda-trade" target="1.8" />
     </bytecodeTargetLevel>
   </component>
