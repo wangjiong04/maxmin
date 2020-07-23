@@ -172,11 +172,12 @@ public class TdaController {
     public ModelAndView calculate(HttpServletRequest request) throws IOException {
         String txt1 = processSymbols(request.getParameter("txt1"));
         String txt2 = processSymbols(request.getParameter("txt2"));
+        String txt3 = processSymbols(request.getParameter("txt3"));
         ModelAndView model = new ModelAndView("calculateResult");
         List<CalculateDto> calculateDtos = Arrays.stream(txt2.split(";")).map(CalculateDto::of).collect(Collectors.toList());
         List<String> headers = calculateDtos.stream().map(CalculateDto::getSymbol).collect(Collectors.toList());
 
-        List<Map<String, String>> rows = calculate(headers, calculateDtos, txt1);
+        List<Map<String, String>> rows = calculate(headers, calculateDtos, txt1, txt3);
 
         model.addObject("headers", headers);
         model.addObject("rows", rows);
@@ -187,8 +188,11 @@ public class TdaController {
         return (double) Math.round(d * 100) / 100;
     }
 
-    private List<Map<String, String>> calculate(List<String> headers, List<CalculateDto> calculateDtos, String symbol) throws IOException {
+    private List<Map<String, String>> calculate(List<String> headers, List<CalculateDto> calculateDtos, String symbol, String txt3) throws IOException {
         headers.add(0, symbol);
+        if (StringUtils.isNotEmpty((txt3))) {
+            headers.add(0, txt3);
+        }
         Map<String, Quote> stockMap = this.tdaClient.getQuoteBySymbols(String.join(",", headers)).stream().collect(Collectors.toMap(Quote::getSymbol, Function.identity()));
         calculateDtos.forEach(calculateDto -> {
             Quote quote = stockMap.get(calculateDto.getSymbol());
@@ -196,7 +200,13 @@ public class TdaController {
             calculateDto.setResultString(formatDouble(calculateDto.getResult()).toString() + "%");
         });
 
-        headers.add(1, "COMBINED");
+        if (StringUtils.isNotEmpty((txt3))) {
+            headers.add(2, "COMBINED");
+        } else {
+            headers.add(1, "COMBINED");
+        }
+
+
         CalculateDto calculateDto = new CalculateDto("COMBINED");
         calculateDto.setResult(calculateDtos.stream().mapToDouble(CalculateDto::getResult).sum() * 3);
         double d1 = calculateDto.getResult();
@@ -210,12 +220,22 @@ public class TdaController {
         calculateDto.setResultString(formatDouble(calculateDto.getResult()).toString() + "%");
         calculateDtos.add(0, calculateDto);
 
+        if (StringUtils.isNotEmpty(txt3)) {
+            calculateDto = new CalculateDto(txt3);
+            quote = stockMap.get(symbol);
+            calculateDto.setResult((quote.getLastPrice() - quote.getClosePrice()) * 100 / quote.getClosePrice());
+            calculateDto.setResultString(formatDouble(calculateDto.getResult()).toString() + "%");
+            calculateDtos.add(0, calculateDto);
+        }
+
 
         headers.add(0, "Difference");
         calculateDto = new CalculateDto("Difference");
         calculateDto.setResult(d2 - d1);
         calculateDtos.add(0, calculateDto);
         calculateDto.setResultString(formatDouble(calculateDto.getResult()).toString() + "%");
+
+
         Map<String, String> mapRow = calculateDtos.stream().collect(Collectors.toMap(CalculateDto::getSymbol, CalculateDto::getResultString));
 
         List<Map<String, String>> rows = new ArrayList<>();
