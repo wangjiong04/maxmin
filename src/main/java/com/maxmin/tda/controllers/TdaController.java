@@ -92,7 +92,7 @@ public class TdaController {
 
     @GetMapping(value="discord")
     public void redirect(HttpServletResponse response) throws  IOException{
-        response.sendRedirect("https://discord.com/channels/740329816494178475");
+        response.sendRedirect("https://discord.com/invite/4cxCYac");
     }
 
     @RequestMapping(value = "showSymbols")
