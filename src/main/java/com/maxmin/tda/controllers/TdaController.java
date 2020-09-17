@@ -91,6 +91,11 @@ public class TdaController {
         return model;
     }
 
+    @GetMapping(value="discord")
+    public void redirect(HttpServletResponse response) throws  IOException{
+        response.sendRedirect("https://discord.com/invite/4cxCYac");
+    }
+
     @RequestMapping(value = "showSymbols")
     public ModelAndView showSymbols(HttpServletRequest request) {
         Map<String, ?> flashMap = RequestContextUtils.getInputFlashMap(request);
