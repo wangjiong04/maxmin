@@ -60,6 +60,7 @@ public class TdaController {
 
         System.out.println("Access Token Response ---------" + tdaClient.getToken().getAccess_token());
         List<Account> accounts = tdaClient.getAccounts();
+        System.out.println("Get Account");
         String accountId = accounts.get(0).getSecuritiesAccount().getAccountId();
         RedirectView redirectView = new RedirectView();
         redirectAttributes.addFlashAttribute("accountId", accountId);
