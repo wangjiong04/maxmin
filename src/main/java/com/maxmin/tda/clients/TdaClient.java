@@ -3,22 +3,7 @@ package com.maxmin.tda.clients;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.maxmin.tda.dto.Account;
-import com.maxmin.tda.dto.ChildStrategy;
-import com.maxmin.tda.dto.LimitTradeRequest;
-import com.maxmin.tda.dto.Order;
-import com.maxmin.tda.dto.OrderLeg;
-import com.maxmin.tda.dto.OrderStrategy;
-import com.maxmin.tda.dto.OrderType;
-import com.maxmin.tda.dto.Position;
-import com.maxmin.tda.dto.PriceDto;
-import com.maxmin.tda.dto.PriceResult;
-import com.maxmin.tda.dto.Quote;
-import com.maxmin.tda.dto.Token;
-import com.maxmin.tda.dto.TradeRequest;
-import com.maxmin.tda.dto.TradeResponse;
-import com.maxmin.tda.dto.TradeType;
-import com.maxmin.tda.dto.Transaction;
+import com.maxmin.tda.dto.*;
 import com.maxmin.tda.utils.ObjectMapperFactory;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -321,12 +306,20 @@ public class TdaClient {
         String searchUrl = String
                 .format("https://api.tdameritrade.com/v1/marketdata/%s/pricehistory?periodType=day&frequencyType=minute&frequency=1&startDate=%s&endDate=%s",
                         stock, start, end);
-        PriceResult response = getResponse(searchUrl, accessToken,
-                new ParameterizedTypeReference<PriceResult>() {
-                });
-        List<PriceDto> priceDtos = response.getCandles().stream().filter(e -> e.getDatetime() < input)
-                .collect(Collectors.toList());
-        return priceDtos.get(priceDtos.size() - 1).getHigh().toString();
+        try {
+            PriceResult response = getResponse(searchUrl, accessToken,
+                    new ParameterizedTypeReference<PriceResult>() {
+                    });
+            List<PriceDto> priceDtos = response.getCandles().stream().filter(e -> e.getDatetime() < input)
+                    .collect(Collectors.toList());
+            if (priceDtos.isEmpty()) {
+                return "Cannot fetch the price.";
+            } else {
+                return priceDtos.get(priceDtos.size() - 1).getHigh().toString();
+            }
+        } catch (Exception ex) {
+            return "Cannot fetch the price.";
+        }
     }
 
     public List<Account> getAccounts() {
@@ -352,11 +345,16 @@ public class TdaClient {
     private <T> T getResponse(String transactionsUrl, String accessToken,
                               ParameterizedTypeReference<T> responseType) {
         RestTemplate restTemplate = new RestTemplate();
-        HttpEntity entity = getEntity(accessToken);
+        try {
+            HttpEntity entity = getEntity(accessToken);
 
-        ResponseEntity<T> response = restTemplate
-                .exchange(transactionsUrl, HttpMethod.GET, entity, responseType);
-        return response.getBody();
+            ResponseEntity<T> response = restTemplate
+                    .exchange(transactionsUrl, HttpMethod.GET, entity, responseType);
+            return response.getBody();
+        } catch (Exception ex) {
+            log.error("Error when trying to get response from tda", ex);
+            throw ex;
+        }
     }
 
     private Map<String, Position> getAccountStock(String accountId) {

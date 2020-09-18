@@ -12,6 +12,7 @@ import com.maxmin.tda.dto.TradeType;
 import com.maxmin.tda.dto.Transaction;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -41,6 +42,9 @@ public class TdaController {
     @Autowired
     private TdaClient tdaClient;
 
+    @Value("${baseUrl}")
+    private String baseUrl;
+
     @PostMapping(value = "redirectPage")
     public void redirect(HttpServletRequest request, HttpServletResponse response) throws IOException {
         tdaClient.setClient_id(request.getParameter("client_id"));
@@ -65,7 +69,7 @@ public class TdaController {
         RedirectView redirectView = new RedirectView();
         redirectAttributes.addFlashAttribute("accountId", accountId);
         redirectView.setContextRelative(true);
-        redirectView.setUrl("/content");
+        redirectView.setUrl(baseUrl + "/content");
         return redirectView;
         //response.sendRedirect("/content");
     }
@@ -91,8 +95,8 @@ public class TdaController {
         return model;
     }
 
-    @GetMapping(value="discord")
-    public void redirect(HttpServletResponse response) throws  IOException{
+    @GetMapping(value = "discord")
+    public void redirect(HttpServletResponse response) throws IOException {
         response.sendRedirect("https://discord.com/invite/4cxCYac");
     }
 
