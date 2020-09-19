@@ -69,7 +69,8 @@ public class TdaController {
         RedirectView redirectView = new RedirectView();
         redirectAttributes.addFlashAttribute("accountId", accountId);
         redirectView.setContextRelative(true);
-        redirectView.setUrl(baseUrl + "/content");
+        //redirectView.setUrl(baseUrl + "/content");
+        redirectView.setUrl("/content");
         return redirectView;
         //response.sendRedirect("/content");
     }
