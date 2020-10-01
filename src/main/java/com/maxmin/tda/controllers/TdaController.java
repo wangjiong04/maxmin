@@ -1,34 +1,30 @@
 package com.maxmin.tda.controllers;
 
+import com.maxmin.tda.clients.AwsClient;
 import com.maxmin.tda.clients.TdaClient;
-import com.maxmin.tda.dto.Account;
-import com.maxmin.tda.dto.CalculateDto;
-import com.maxmin.tda.dto.Config;
-import com.maxmin.tda.dto.Order;
-import com.maxmin.tda.dto.OrderType;
-import com.maxmin.tda.dto.Quote;
-import com.maxmin.tda.dto.TradeResponse;
-import com.maxmin.tda.dto.TradeType;
-import com.maxmin.tda.dto.Transaction;
+import com.maxmin.tda.dto.*;
+import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Date;
+import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,15 +38,52 @@ public class TdaController {
     @Autowired
     private TdaClient tdaClient;
 
+    @Autowired
+    private AwsClient awsClient;
+
     @Value("${baseUrl}")
     private String baseUrl;
 
     @PostMapping(value = "redirectPage")
-    public void redirect(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        tdaClient.setClient_id(request.getParameter("client_id"));
-        tdaClient.setRedirect_uri(request.getParameter("redirect_uri"));
-        String url = tdaClient.getCodeUrl();
-        response.sendRedirect(url);
+    public void redirect(HttpServletRequest request, HttpServletResponse response) throws IOException,CsvException,ParseException {
+        List<String> files=awsClient.getFiles();
+        String accountId="";
+        Cookie[] cookies =  request.getCookies();
+        if(cookies != null){
+            for(Cookie cookie : cookies){
+                if(cookie.getName().equals("accountId")){
+                    accountId= cookie.getValue();
+                }
+            }
+        }
+        if (StringUtils.isNotEmpty(accountId) && files.contains(accountId)){
+            List<String[]> csv = awsClient.getCSV(accountId);
+            Token token=new Token();
+            token.setAccess_token(csv.get(0)[0]);
+            token.setRefresh_token(csv.get(0)[1]);
+            token.setExpires_in(Integer.valueOf(csv.get(0)[2]));
+            token.setRefresh_token_expires_in(Integer.valueOf(csv.get(0)[3]));
+            token.setTokenDate(Instant.parse(csv.get(0)[4]));
+            token.setToken_type(csv.get(0)[5]);
+            tdaClient.setToken(token);
+            response.sendRedirect("/redirectToContent");
+        }
+        else
+        {
+            tdaClient.setClient_id(request.getParameter("client_id"));
+            tdaClient.setRedirect_uri(request.getParameter("redirect_uri"));
+            String url = tdaClient.getCodeUrl();
+            response.sendRedirect(url);
+        }
+
+    }
+
+    @GetMapping(value = "redirectToContent")
+    public RedirectView redirect(RedirectAttributes redirectAttributes,@CookieValue("accountId") String accountId){
+        RedirectView redirectView = new RedirectView("/content",true,false);
+        redirectAttributes.addFlashAttribute("accountId", accountId);
+
+        return redirectView;
     }
 
 
@@ -66,11 +99,33 @@ public class TdaController {
         List<Account> accounts = tdaClient.getAccounts();
         System.out.println("Get Account");
         String accountId = accounts.get(0).getSecuritiesAccount().getAccountId();
-        RedirectView redirectView = new RedirectView();
+
+
+        List<String> files=awsClient.getFiles();
+        try {
+            if (files.contains(accountId)) {
+                List<String[]> csv = awsClient.getCSV(accountId);
+
+            } else {
+                String[] strs=new String[6];
+                strs[0]=this.tdaClient.getToken().getAccess_token();
+                strs[1]=this.tdaClient.getToken().getRefresh_token();
+                strs[2]=String.valueOf(this.tdaClient.getToken().getExpires_in());
+                strs[3]=String.valueOf(this.tdaClient.getToken().getRefresh_token_expires_in());
+                strs[4]=this.tdaClient.getToken().getTokenDate().toString();
+                strs[5]=this.tdaClient.getToken().getToken_type();
+                List<String[]> list=new ArrayList<>();
+                list.add(strs);
+                awsClient.writeCSV(list,accountId);
+            }
+        }catch (CsvException ex){
+
+        }
+        RedirectView redirectView = new RedirectView("/content",true,false);
         redirectAttributes.addFlashAttribute("accountId", accountId);
-        redirectView.setContextRelative(true);
+
         //redirectView.setUrl(baseUrl + "/content");
-        redirectView.setUrl("/content");
+
         return redirectView;
         //response.sendRedirect("/content");
     }
@@ -89,8 +144,11 @@ public class TdaController {
     }
 
     @RequestMapping(value = "content")
-    public ModelAndView getContent(HttpServletRequest request) throws IOException {
+    public ModelAndView getContent(HttpServletRequest request,HttpServletResponse response,@ModelAttribute(value = "accountId")String  accountId) throws IOException {
         //List<Quote> list = tdaClient.getQuotes();
+        Cookie cookie = new Cookie("accountId", accountId);
+        cookie.setMaxAge(7 * 24 * 60 * 60 * 100); // expires in 7 days
+        response.addCookie(cookie);
         ModelAndView model = new ModelAndView("content");
         //model.addObject("list", list);
         return model;

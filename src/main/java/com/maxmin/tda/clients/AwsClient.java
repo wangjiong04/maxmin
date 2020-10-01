@@ -6,16 +6,19 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.*;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+import com.opencsv.exceptions.CsvException;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.validation.Valid;
-import java.io.File;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,19 +38,8 @@ public class AwsClient {
     private AmazonS3 s3client;
     private final String bucketName="trade-users";
 
-    public AwsClient() {
-
-    }
-
-    public void uploadFile(String fileName, File file){
-        s3client.putObject(
-                bucketName,
-                fileName,
-                file
-        );
-    }
-
-    public List<String> getFiles(){
+    @PostConstruct
+    public void init(){
         AWSCredentials credentials = new BasicAWSCredentials(
                 accessKey, secretKey
         );
@@ -56,11 +48,44 @@ public class AwsClient {
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withRegion(Regions.US_EAST_1)
                 .build();
+    }
+
+    public void uploadFile(String fileName, InputStream inputStream){
+        s3client.putObject(
+                bucketName,
+                fileName,
+                inputStream,new ObjectMetadata()
+        );
+    }
+
+    public List<String> getFiles(){
+
         ObjectListing objectListing =  s3client.listObjects(bucketName);
         return objectListing.getObjectSummaries().stream().map(S3ObjectSummary::getKey).collect(Collectors.toList());
     }
 
-    public S3Object getFileByName(String fileName){
-        return s3client.getObject(bucketName, fileName);
+    private S3ObjectInputStream getFileByName(String fileName){
+        S3Object s3Object= s3client.getObject(bucketName, fileName);
+        return s3Object.getObjectContent();
+    }
+
+    public List<String[]> getCSV(String fileName) throws IOException,CsvException{
+        S3ObjectInputStream inputStream=getFileByName(fileName);
+        InputStreamReader reader=new InputStreamReader(inputStream);
+        CSVReader csvReader=new CSVReader(reader);
+        List<String[]> list = new ArrayList<>();
+        list = csvReader.readAll();
+        reader.close();
+        csvReader.close();
+        return list;
+    }
+
+    public void writeCSV(List<String[]> in, String fileName) throws IOException{
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        OutputStreamWriter streamWriter = new OutputStreamWriter(stream);
+        CSVWriter writer= new CSVWriter(streamWriter);
+        writer.writeAll(in);
+        writer.close();
+        this.uploadFile(fileName, new ByteArrayInputStream(stream.toByteArray()));
     }
 }

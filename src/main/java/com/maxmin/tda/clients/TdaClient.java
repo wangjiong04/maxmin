@@ -451,12 +451,13 @@ public class TdaClient {
         body.add("redirect_uri", redirect_uri);
         HttpEntity entity = new HttpEntity<>(body, headers);
 
+
         String access_token_url = "https://api.tdameritrade.com/v1/oauth2/token";
 
         ResponseEntity<Token> token = restTemplate
                 .exchange(access_token_url, HttpMethod.POST, entity, Token.class);
         this.token = token.getBody();
-        this.token.setTokenDate(new Date());
+        this.token.setTokenDate(Instant.now());
     }
 
     private String getAccessToken() {
@@ -490,7 +491,7 @@ public class TdaClient {
         return isTokenExpired(token.getRefresh_token_expires_in(), token.getTokenDate());
     }
 
-    private boolean isTokenExpired(int expireSeconds, Date tokenDate) {
-        return Instant.now().isAfter(tokenDate.toInstant().plusSeconds(expireSeconds));
+    private boolean isTokenExpired(int expireSeconds, Instant tokenDate) {
+        return Instant.now().isAfter(tokenDate.plusSeconds(expireSeconds));
     }
 }
