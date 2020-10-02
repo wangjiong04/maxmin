@@ -12,6 +12,8 @@ import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +52,7 @@ public class AwsClient {
                 .build();
     }
 
-    public void uploadFile(String fileName, InputStream inputStream){
+    private void uploadFile(String fileName, InputStream inputStream){
         s3client.putObject(
                 bucketName,
                 fileName,
@@ -58,8 +60,8 @@ public class AwsClient {
         );
     }
 
+    @Cacheable(value = "files")
     public List<String> getFiles(){
-
         ObjectListing objectListing =  s3client.listObjects(bucketName);
         return objectListing.getObjectSummaries().stream().map(S3ObjectSummary::getKey).collect(Collectors.toList());
     }
@@ -68,18 +70,18 @@ public class AwsClient {
         S3Object s3Object= s3client.getObject(bucketName, fileName);
         return s3Object.getObjectContent();
     }
-
+    @Cacheable(key = "#fileName",value = "csv")
     public List<String[]> getCSV(String fileName) throws IOException,CsvException{
         S3ObjectInputStream inputStream=getFileByName(fileName);
         InputStreamReader reader=new InputStreamReader(inputStream);
         CSVReader csvReader=new CSVReader(reader);
-        List<String[]> list = new ArrayList<>();
-        list = csvReader.readAll();
+        List<String[]> list = csvReader.readAll();
         reader.close();
         csvReader.close();
         return list;
     }
 
+    @CachePut(key = "#fileName",value = "csv")
     public void writeCSV(List<String[]> in, String fileName) throws IOException{
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         OutputStreamWriter streamWriter = new OutputStreamWriter(stream);
