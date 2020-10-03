@@ -11,6 +11,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @Data
+@Slf4j
 public class AwsClient {
 
     @Value("${access_key}")
@@ -45,6 +47,7 @@ public class AwsClient {
         AWSCredentials credentials = new BasicAWSCredentials(
                 accessKey, secretKey
         );
+
         s3client  = AmazonS3ClientBuilder
                 .standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))

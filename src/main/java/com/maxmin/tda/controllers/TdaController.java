@@ -5,7 +5,8 @@ import com.maxmin.tda.clients.TdaClient;
 import com.maxmin.tda.dto.*;
 import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -44,9 +45,12 @@ public class TdaController {
     @Value("${baseUrl}")
     private String baseUrl;
 
+    private static final Logger log = LoggerFactory.getLogger((TdaController.class));
+
     @PostMapping(value = "redirectPage")
     public void redirect(HttpServletRequest request, HttpServletResponse response) throws IOException,CsvException,ParseException {
         List<String> files=awsClient.getFiles();
+        log.info(files.toString());
         String accountId="";
         Cookie[] cookies =  request.getCookies();
         if(cookies != null){
@@ -59,6 +63,7 @@ public class TdaController {
         boolean redirectToTda=true;
         if (StringUtils.isNotEmpty(accountId) && files.contains(accountId)){
             List<String[]> csv = awsClient.getCSV(accountId);
+            log.info(csv.toString());
             Token token=tdaClient.csvToToken(csv);
             tdaClient.setToken(token);
             if (!tdaClient.isAccessTokenExpired()){
@@ -83,6 +88,7 @@ public class TdaController {
     public RedirectView redirect(RedirectAttributes redirectAttributes,@CookieValue("accountId") String accountId){
         RedirectView redirectView = new RedirectView("/content",true,false);
         redirectAttributes.addFlashAttribute("accountId", accountId);
+
         return redirectView;
     }
 
@@ -139,10 +145,17 @@ public class TdaController {
             Cookie cookie = new Cookie("accountId", accountId);
             cookie.setMaxAge(7 * 24 * 60 * 60 * 100); // expires in 7 days
             response.addCookie(cookie);
+            ModelAndView model = new ModelAndView("content");
+            //model.addObject("list", list);
+            return model;
+        }else
+        {
+            ModelAndView model = new ModelAndView("default");
+            model.addObject("config",new Config(tdaClient.getClient_id(), tdaClient.getRedirect_uri()));
+            //model.addObject("list", list);
+            return model;
         }
-        ModelAndView model = new ModelAndView("content");
-        //model.addObject("list", list);
-        return model;
+
     }
 
     @GetMapping(value = "discord")
