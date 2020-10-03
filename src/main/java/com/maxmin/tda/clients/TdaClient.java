@@ -46,9 +46,6 @@ public class TdaClient {
     @Value("${redirect_uri}")
     private String redirect_uri;
 
-    @Value("${server.token}")
-    private String serverToken;
-
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance()
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
@@ -403,10 +400,32 @@ public class TdaClient {
         return list;
     }
 
+    public Token csvToToken(List<String[]> csv){
+        Token token=new Token();
+        token.setAccess_token(csv.get(0)[0]);
+        token.setRefresh_token(csv.get(0)[1]);
+        token.setExpires_in(Integer.valueOf(csv.get(0)[2]));
+        token.setRefresh_token_expires_in(Integer.valueOf(csv.get(0)[3]));
+        token.setTokenDate(Instant.parse(csv.get(0)[4]));
+        token.setToken_type(csv.get(0)[5]);
+        return token;
+    }
+
+    public List<String[]> tokenToCSV(Token token){
+        String[] strs=new String[6];
+        strs[0]=token.getAccess_token();
+        strs[1]=token.getRefresh_token();
+        strs[2]=String.valueOf(token.getExpires_in());
+        strs[3]=String.valueOf(token.getRefresh_token_expires_in());
+        strs[4]=token.getTokenDate().toString();
+        strs[5]=token.getToken_type();
+        List<String[]> list=new ArrayList<>();
+        list.add(strs);
+        return list;
+    }
+
     private HttpEntity getEntity(String token) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + token);
-        return new HttpEntity<>(headers);
+        return new HttpEntity<>(getHeader(token));
     }
 
     private HttpHeaders getHeader(String token) {
@@ -429,7 +448,7 @@ public class TdaClient {
         return dateFormat.format(d);
     }
 
-    private void getTokenByRefreshToken(String refreshToken) {
+    public void getTokenByRefreshToken(String refreshToken) {
         getTokenFromTda(false, refreshToken);
     }
 
@@ -462,10 +481,7 @@ public class TdaClient {
 
     private String getAccessToken() {
         if (null == token) {
-            if (StringUtils.isEmpty(serverToken))
-                return "";
-            else
-                return serverToken;
+            return "";
         }
         if (!isAccessTokenExpired()) {
             return token.getAccess_token();
@@ -477,18 +493,13 @@ public class TdaClient {
         return "";
     }
 
-    private boolean isAccessTokenExpired() {
-        if (null == token) {
-            return true;
-        }
-        return isTokenExpired(token.getExpires_in(), token.getTokenDate());
+    public boolean isAccessTokenExpired() {
+
+        return null == token || isTokenExpired(token.getExpires_in(), token.getTokenDate());
     }
 
-    private boolean isRefreshTokenExpired() {
-        if (null == token) {
-            return true;
-        }
-        return isTokenExpired(token.getRefresh_token_expires_in(), token.getTokenDate());
+    public boolean isRefreshTokenExpired() {
+        return null==token || isTokenExpired(token.getRefresh_token_expires_in(), token.getTokenDate());
     }
 
     private boolean isTokenExpired(int expireSeconds, Instant tokenDate) {

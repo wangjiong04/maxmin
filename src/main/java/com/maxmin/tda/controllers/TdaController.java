@@ -56,33 +56,33 @@ public class TdaController {
                 }
             }
         }
+        boolean redirectToTda=true;
         if (StringUtils.isNotEmpty(accountId) && files.contains(accountId)){
             List<String[]> csv = awsClient.getCSV(accountId);
-            Token token=new Token();
-            token.setAccess_token(csv.get(0)[0]);
-            token.setRefresh_token(csv.get(0)[1]);
-            token.setExpires_in(Integer.valueOf(csv.get(0)[2]));
-            token.setRefresh_token_expires_in(Integer.valueOf(csv.get(0)[3]));
-            token.setTokenDate(Instant.parse(csv.get(0)[4]));
-            token.setToken_type(csv.get(0)[5]);
+            Token token=tdaClient.csvToToken(csv);
             tdaClient.setToken(token);
-            response.sendRedirect("/redirectToContent");
+            if (!tdaClient.isAccessTokenExpired()){
+                redirectToTda=false;
+            }
+            if (tdaClient.isAccessTokenExpired() && !tdaClient.isRefreshTokenExpired()){
+                tdaClient.getTokenByRefreshToken(tdaClient.getToken().getRefresh_token());
+                redirectToTda=false;
+            }
         }
-        else
-        {
+        if (redirectToTda){
             tdaClient.setClient_id(request.getParameter("client_id"));
             tdaClient.setRedirect_uri(request.getParameter("redirect_uri"));
             String url = tdaClient.getCodeUrl();
             response.sendRedirect(url);
+        }else{
+            response.sendRedirect("/redirectToContent");
         }
-
     }
 
     @GetMapping(value = "redirectToContent")
     public RedirectView redirect(RedirectAttributes redirectAttributes,@CookieValue("accountId") String accountId){
         RedirectView redirectView = new RedirectView("/content",true,false);
         redirectAttributes.addFlashAttribute("accountId", accountId);
-
         return redirectView;
     }
 
@@ -100,25 +100,14 @@ public class TdaController {
         System.out.println("Get Account");
         String accountId = accounts.get(0).getSecuritiesAccount().getAccountId();
 
-
         List<String> files=awsClient.getFiles();
         try {
-            if (files.contains(accountId)) {
-                List<String[]> csv = awsClient.getCSV(accountId);
-
-            } else {
-                String[] strs=new String[6];
-                strs[0]=this.tdaClient.getToken().getAccess_token();
-                strs[1]=this.tdaClient.getToken().getRefresh_token();
-                strs[2]=String.valueOf(this.tdaClient.getToken().getExpires_in());
-                strs[3]=String.valueOf(this.tdaClient.getToken().getRefresh_token_expires_in());
-                strs[4]=this.tdaClient.getToken().getTokenDate().toString();
-                strs[5]=this.tdaClient.getToken().getToken_type();
-                List<String[]> list=new ArrayList<>();
-                list.add(strs);
-                awsClient.writeCSV(list,accountId);
+            awsClient.writeCSV(tdaClient.tokenToCSV(this.tdaClient.getToken()),accountId);
+            if (!files.contains(accountId)) {
+                files.add(accountId);
+                awsClient.refreshFiles(files);
             }
-        }catch (CsvException ex){
+        }catch (Exception ex){
 
         }
         RedirectView redirectView = new RedirectView("/content",true,false);
@@ -146,9 +135,11 @@ public class TdaController {
     @RequestMapping(value = "content")
     public ModelAndView getContent(HttpServletRequest request,HttpServletResponse response,@ModelAttribute(value = "accountId")String  accountId) throws IOException {
         //List<Quote> list = tdaClient.getQuotes();
-        Cookie cookie = new Cookie("accountId", accountId);
-        cookie.setMaxAge(7 * 24 * 60 * 60 * 100); // expires in 7 days
-        response.addCookie(cookie);
+        if (StringUtils.isNotEmpty(accountId)) {
+            Cookie cookie = new Cookie("accountId", accountId);
+            cookie.setMaxAge(7 * 24 * 60 * 60 * 100); // expires in 7 days
+            response.addCookie(cookie);
+        }
         ModelAndView model = new ModelAndView("content");
         //model.addObject("list", list);
         return model;

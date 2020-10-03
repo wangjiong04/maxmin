@@ -66,6 +66,10 @@ public class AwsClient {
         return objectListing.getObjectSummaries().stream().map(S3ObjectSummary::getKey).collect(Collectors.toList());
     }
 
+    @CachePut(value = "files")
+    public void refreshFiles(List<String> files){
+    }
+
     private S3ObjectInputStream getFileByName(String fileName){
         S3Object s3Object= s3client.getObject(bucketName, fileName);
         return s3Object.getObjectContent();
