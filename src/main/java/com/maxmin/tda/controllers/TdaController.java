@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -22,15 +21,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Date;
 import java.text.ParseException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -42,51 +34,67 @@ public class TdaController {
     @Autowired
     private AwsClient awsClient;
 
-    @Value("${baseUrl}")
-    private String baseUrl;
-
     private static final Logger log = LoggerFactory.getLogger((TdaController.class));
 
     @PostMapping(value = "redirectPage")
-    public void redirect(HttpServletRequest request, HttpServletResponse response) throws IOException,CsvException,ParseException {
-        List<String> files=awsClient.getFiles();
+    public void redirect(HttpServletRequest request, HttpServletResponse response) throws IOException, CsvException, ParseException {
+        List<String> files = awsClient.getFiles();
         log.info(files.toString());
-        String accountId="";
-        Cookie[] cookies =  request.getCookies();
-        if(cookies != null){
-            for(Cookie cookie : cookies){
-                if(cookie.getName().equals("accountId")){
-                    accountId= cookie.getValue();
+        String accountId = "";
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("accountId")) {
+                    accountId = cookie.getValue();
                 }
             }
         }
-        boolean redirectToTda=true;
-        if (StringUtils.isNotEmpty(accountId) && files.contains(accountId)){
-            List<String[]> csv = awsClient.getCSV(accountId);
-            log.info(csv.toString());
-            Token token=tdaClient.csvToToken(csv);
-            tdaClient.setToken(token);
-            if (!tdaClient.isAccessTokenExpired()){
-                redirectToTda=false;
-            }
-            if (tdaClient.isAccessTokenExpired() && !tdaClient.isRefreshTokenExpired()){
-                tdaClient.getTokenByRefreshToken(tdaClient.getToken().getRefresh_token());
-                redirectToTda=false;
-            }
-        }
-        if (redirectToTda){
+        log.info("account id: " + accountId);
+        boolean redirectToTda = redirectToTda(accountId, files);
+        if (redirectToTda) {
             tdaClient.setClient_id(request.getParameter("client_id"));
             tdaClient.setRedirect_uri(request.getParameter("redirect_uri"));
             String url = tdaClient.getCodeUrl();
             response.sendRedirect(url);
-        }else{
+        } else {
             response.sendRedirect("/redirectToContent");
         }
     }
 
+    private boolean redirectToTda(String accountId, List<String> files) {
+        boolean redirectToTda = true;
+        try {
+            if (StringUtils.isNotEmpty(accountId) && files.contains(accountId)) {
+                List<String[]> csv = awsClient.getCSV(accountId);
+                if (null == csv) {
+                    log.info("get csv null for account:" + accountId);
+                    return true;
+                }
+                if (csv.isEmpty()) {
+                    log.info("csv is empty for account:" + accountId);
+                    return true;
+                }
+                log.info(Arrays.toString(csv.get(0)));
+                Token token = tdaClient.csvToToken(csv);
+                tdaClient.setToken(token);
+                if (!tdaClient.isAccessTokenExpired()) {
+                    redirectToTda = false;
+                }
+                if (tdaClient.isAccessTokenExpired() && !tdaClient.isRefreshTokenExpired()) {
+                    tdaClient.setToken(tdaClient.getTokenByRefreshToken(tdaClient.getToken().getRefresh_token()));
+                    redirectToTda = false;
+                }
+            }
+            return redirectToTda;
+        } catch (CsvException | IOException ex) {
+            log.error("get token from csv error for account: " + accountId, ex);
+            return true;
+        }
+    }
+
     @GetMapping(value = "redirectToContent")
-    public RedirectView redirect(RedirectAttributes redirectAttributes,@CookieValue("accountId") String accountId){
-        RedirectView redirectView = new RedirectView("/content",true,false);
+    public RedirectView redirect(RedirectAttributes redirectAttributes, @CookieValue("accountId") String accountId) {
+        RedirectView redirectView = new RedirectView("/content", true, false);
         redirectAttributes.addFlashAttribute("accountId", accountId);
 
         return redirectView;
@@ -99,24 +107,24 @@ public class TdaController {
 
         System.out.println("Authorization Code------" + code);
 
-        tdaClient.getTokeByCode(code);
+        tdaClient.setToken(tdaClient.getTokeByCode(code));
 
         System.out.println("Access Token Response ---------" + tdaClient.getToken().getAccess_token());
         List<Account> accounts = tdaClient.getAccounts();
         System.out.println("Get Account");
         String accountId = accounts.get(0).getSecuritiesAccount().getAccountId();
 
-        List<String> files=awsClient.getFiles();
+        List<String> files = awsClient.getFiles();
         try {
-            awsClient.writeCSV(tdaClient.tokenToCSV(this.tdaClient.getToken()),accountId);
+            awsClient.writeCSV(tdaClient.tokenToCSV(this.tdaClient.getToken()), accountId);
             if (!files.contains(accountId)) {
                 files.add(accountId);
                 awsClient.refreshFiles(files);
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
 
         }
-        RedirectView redirectView = new RedirectView("/content",true,false);
+        RedirectView redirectView = new RedirectView("/content", true, false);
         redirectAttributes.addFlashAttribute("accountId", accountId);
 
         //redirectView.setUrl(baseUrl + "/content");
@@ -139,7 +147,7 @@ public class TdaController {
     }
 
     @RequestMapping(value = "content")
-    public ModelAndView getContent(HttpServletRequest request,HttpServletResponse response,@ModelAttribute(value = "accountId")String  accountId) throws IOException {
+    public ModelAndView getContent(HttpServletRequest request, HttpServletResponse response, @ModelAttribute(value = "accountId") String accountId) throws IOException {
         //List<Quote> list = tdaClient.getQuotes();
         if (StringUtils.isNotEmpty(accountId)) {
             Cookie cookie = new Cookie("accountId", accountId);
@@ -148,10 +156,9 @@ public class TdaController {
             ModelAndView model = new ModelAndView("content");
             //model.addObject("list", list);
             return model;
-        }else
-        {
+        } else {
             ModelAndView model = new ModelAndView("default");
-            model.addObject("config",new Config(tdaClient.getClient_id(), tdaClient.getRedirect_uri()));
+            model.addObject("config", new Config(tdaClient.getClient_id(), tdaClient.getRedirect_uri()));
             //model.addObject("list", list);
             return model;
         }

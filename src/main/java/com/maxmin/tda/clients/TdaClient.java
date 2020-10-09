@@ -9,11 +9,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -26,14 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -66,8 +55,8 @@ public class TdaClient {
         }
     }
 
-    public void getTokeByCode(String code) {
-        getTokenFromTda(true, code);
+    public Token getTokeByCode(String code) {
+        return getTokenFromTda(true, code);
     }
 
     public List<Quote> getQuotes(String accountId) throws IOException {
@@ -400,8 +389,8 @@ public class TdaClient {
         return list;
     }
 
-    public Token csvToToken(List<String[]> csv){
-        Token token=new Token();
+    public Token csvToToken(List<String[]> csv) {
+        Token token = new Token();
         token.setAccess_token(csv.get(0)[0]);
         token.setRefresh_token(csv.get(0)[1]);
         token.setExpires_in(Integer.valueOf(csv.get(0)[2]));
@@ -411,15 +400,15 @@ public class TdaClient {
         return token;
     }
 
-    public List<String[]> tokenToCSV(Token token){
-        String[] strs=new String[6];
-        strs[0]=token.getAccess_token();
-        strs[1]=token.getRefresh_token();
-        strs[2]=String.valueOf(token.getExpires_in());
-        strs[3]=String.valueOf(token.getRefresh_token_expires_in());
-        strs[4]=token.getTokenDate().toString();
-        strs[5]=token.getToken_type();
-        List<String[]> list=new ArrayList<>();
+    public List<String[]> tokenToCSV(Token token) {
+        String[] strs = new String[6];
+        strs[0] = token.getAccess_token();
+        strs[1] = token.getRefresh_token();
+        strs[2] = String.valueOf(token.getExpires_in());
+        strs[3] = String.valueOf(token.getRefresh_token_expires_in());
+        strs[4] = token.getTokenDate().toString();
+        strs[5] = token.getToken_type();
+        List<String[]> list = new ArrayList<>();
         list.add(strs);
         return list;
     }
@@ -448,11 +437,11 @@ public class TdaClient {
         return dateFormat.format(d);
     }
 
-    public void getTokenByRefreshToken(String refreshToken) {
-        getTokenFromTda(false, refreshToken);
+    public Token getTokenByRefreshToken(String refreshToken) {
+        return getTokenFromTda(false, refreshToken);
     }
 
-    private void getTokenFromTda(boolean byCode, String value) {
+    private Token getTokenFromTda(boolean byCode, String value) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -475,8 +464,9 @@ public class TdaClient {
 
         ResponseEntity<Token> token = restTemplate
                 .exchange(access_token_url, HttpMethod.POST, entity, Token.class);
-        this.token = token.getBody();
-        this.token.setTokenDate(Instant.now());
+        Token token1 = token.getBody();
+        token1.setTokenDate(Instant.now());
+        return token1;
     }
 
     private String getAccessToken() {
@@ -487,7 +477,7 @@ public class TdaClient {
             return token.getAccess_token();
         }
         if (!isRefreshTokenExpired()) {
-            getTokenByRefreshToken(token.getRefresh_token());
+            this.token = getTokenByRefreshToken(token.getRefresh_token());
             return token.getAccess_token();
         }
         return "";
@@ -499,7 +489,7 @@ public class TdaClient {
     }
 
     public boolean isRefreshTokenExpired() {
-        return null==token || isTokenExpired(token.getRefresh_token_expires_in(), token.getTokenDate());
+        return null == token || isTokenExpired(token.getRefresh_token_expires_in(), token.getTokenDate());
     }
 
     private boolean isTokenExpired(int expireSeconds, Instant tokenDate) {
