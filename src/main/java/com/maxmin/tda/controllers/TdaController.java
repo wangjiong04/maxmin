@@ -278,6 +278,15 @@ public class TdaController {
         return ResponseEntity.ok(tdaClient.getOptionChain(stock));
     }
 
+    @RequestMapping(value = "OptionChain", method = RequestMethod.GET)
+    public ModelAndView getOptionChain1(HttpServletRequest request) {
+        String stock = request.getParameter("symbol");
+        String result = tdaClient.getOptionChain(stock);
+        ModelAndView model = new ModelAndView("OptionChain");
+        model.addObject("result", result);
+        return model;
+    }
+
     private Double formatDouble(double d) {
         return (double) Math.round(d * 100) / 100;
     }

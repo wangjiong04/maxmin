@@ -491,6 +491,10 @@
             })
             ;
         }
+
+        function getOptionChain1() {
+            window.open("/OptionChain?symbol=" + $("#selSymbol").val());
+        }
     </script>
 </head>
 <body>
@@ -641,7 +645,8 @@
                     <option value="UMC">UMC</option>
                     <option value="HUBS">HUBS</option>
                 </select>&nbsp;
-                <input type="button" value="Get Option Chain" id="btnOptionChain" th:onclick="'getOptionChain();'"/>
+
+                <input type="button" value="Get Option Chain" id="btnOptionChain" th:onclick="'getOptionChain1();'"/>
             </td>
         </tr>
     </table>
