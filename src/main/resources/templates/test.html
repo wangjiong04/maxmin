@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+<div id="payment-request-button">
+    <button id="checkout-button">Checkout</button>
+
+    <script type="text/javascript">
+        var stripe = Stripe("pk_test_DtwiHhs63jJLGiNKq45Q2yet00FpCWLASQ");
+        var checkoutButton = document.getElementById("checkout-button");
+        checkoutButton.addEventListener("click", function () {
+            stripe.redirectToCheckout({sessionId: 'cs_test_X0Lf4ndI4MYc0IGCLGguJaykeSFsPrStTlHJ80Ssv8jB8kCukEYY8bgF'}).then(function (result) {
+                alert(result);
+            });
+        });
+    </script>
+</div>
+</body>
+</html>

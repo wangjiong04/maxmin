@@ -26,18 +26,20 @@ public class Scheduler {
 
     @Scheduled(cron = "0 0 12 ? * SUN")
     public void refreshToken() {
-        log.info("refresh token every day.");
+        log.info("refresh token every week.");
         List<String> accounts = awsClient.getFiles();
         for (String accountId : accounts
         ) {
             try {
                 List<String[]> csv = awsClient.getCSV(accountId);
                 Token token = tdaClient.csvToToken(csv);
-                token = tdaClient.getTokenByRefreshToken(token.getRefresh_token());
+                token = tdaClient.getTokenByRefreshToken(token);
                 csv = tdaClient.tokenToCSV(token);
                 awsClient.writeCSV(csv, accountId);
             } catch (IOException | CsvException ex) {
                 log.error("get csv failed", ex);
+            } catch (Exception ex) {
+                log.error("refresh token error", ex);
             }
         }
     }

@@ -2,13 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <title>Title</title>
+    <title>bottomintopout.com</title>
     <link rel="stylesheet" type="text/css" media="all" href="../static/css/style.css" th:href="@{/css/style.css}"/>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"/>
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.6/css/buttons.dataTables.min.css"/>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+
     <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 
     <script src="https://cdn.datatables.net/buttons/1.5.6/js/dataTables.buttons.min.js"></script>
@@ -40,7 +40,7 @@
         });
         $(function () {
             //$('#loading').show();
-            getStock();
+            //getStock();
             window.setInterval(getStock, 5 * 1000);
             $('#loading').hide();
         });
@@ -399,11 +399,12 @@
                 $('#btnOrders').val("Show Orders");
             }
         }
+
         function delete_cookie(name) {
-            document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         }
 
-        function logout(){
+        function logout() {
             delete_cookie("accountId");
             window.location.href = '/';
         }
@@ -462,6 +463,29 @@
                     $("#calculateResult").empty().append(data);
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.responseText);
+                }
+            })
+            ;
+        }
+
+        function getOptionChain() {
+            // var newWindow = window.open('about:blank');
+            $.ajax({
+                type: "GET",
+                url: "/optionChain",
+                data: {
+                    symbol: $("#selSymbol").val(),
+                    accountId: $("#txtAccountId").val()
+                },
+                success: function (data) {
+                    // newWindow.location.href = "Chain.html";
+                    // newWindow.document.write(data);
+                    var obj = window.open("about:blank");
+                    obj.document.write(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    newWindow.close();
                     alert(XMLHttpRequest.responseText);
                 }
             })
@@ -552,6 +576,72 @@
                        value="AAPL_0.099;AMZN_0.0915;BABA_0.0955;BIDU_0.0897;FB_0.0982;GOOGL_0.0974;NFLX_0.0918;NVDA_0.0855;TSLA_0.1217;TWTR_0.1288"
                        style="width:1000px"/>
                 <input type="button" value="Calculate" id="btnCalculate" th:onclick="'calculate();'"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <select id="selSymbol" required="required">
+                    <option value="OSTK">OSTK</option>
+                    <option value="TQQQ">TQQQ</option>
+                    <option value="FNGU">FNGU</option>
+                    <option value="TECL">TECL</option>
+                    <option value="SOXL">SOXL</option>
+                    <option value="ZM">ZM</option>
+                    <option value="FVRR">FVRR</option>
+                    <option value="FSLY">FSLY</option>
+                    <option value="APPS">APPS</option>
+                    <option value="NIO">NIO</option>
+                    <option value="TSLA">TSLA</option>
+                    <option value="RUN">RUN</option>
+                    <option value="PTON">PTON</option>
+                    <option value="SE">SE</option>
+                    <option value="DQ">DQ</option>
+                    <option value="ENPH">ENPH</option>
+                    <option value="NET">NET</option>
+                    <option value="ETSY">ETSY</option>
+                    <option value="TWLO">TWLO</option>
+                    <option value="ZS">ZS</option>
+                    <option value="SPWR">SPWR</option>
+                    <option value="VNET">VNET</option>
+                    <option value="DOCU">DOCU</option>
+                    <option value="SEDG">SEDG</option>
+                    <option value="BILL">BILL</option>
+                    <option value="DDOG">DDOG</option>
+                    <option value="CRWD">CRWD</option>
+                    <option value="SQ">SQ</option>
+                    <option value="BAND">BAND</option>
+                    <option value="SPT">SPT</option>
+                    <option value="JKS">JKS</option>
+                    <option value="PENN">PENN</option>
+                    <option value="MTLS">MTLS</option>
+                    <option value="FTCH">FTCH</option>
+                    <option value="BILI">BILI</option>
+                    <option value="NOVA">NOVA</option>
+                    <option value="TTD">TTD</option>
+                    <option value="NVDA">NVDA</option>
+                    <option value="WIX">WIX</option>
+                    <option value="PINS">PINS</option>
+                    <option value="CVNA">CVNA</option>
+                    <option value="JD">Jd</option>
+                    <option value="CHWY">CHWY</option>
+                    <option value="PDD">PDD</option>
+                    <option value="FIVN">FIVN</option>
+                    <option value="CWH">CWH</option>
+                    <option value="ZG">ZG</option>
+                    <option value="MELI">MELI</option>
+                    <option value="Z">Z</option>
+                    <option value="DAO">DAO</option>
+                    <option value="COUP">COUP</option>
+                    <option value="OKTA">OKTA</option>
+                    <option value="APPN">APPN</option>
+                    <option value="AVLR">AVLR</option>
+                    <option value="DADA">DADA</option>
+                    <option value="OCFT">OCFT</option>
+                    <option value="MDB">MDB</option>
+                    <option value="UMC">UMC</option>
+                    <option value="HUBS">HUBS</option>
+                </select>&nbsp;
+                <input type="button" value="Get Option Chain" id="btnOptionChain" th:onclick="'getOptionChain();'"/>
             </td>
         </tr>
     </table>

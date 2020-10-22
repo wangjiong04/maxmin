@@ -81,8 +81,13 @@ public class TdaController {
                     redirectToTda = false;
                 }
                 if (tdaClient.isAccessTokenExpired() && !tdaClient.isRefreshTokenExpired()) {
-                    tdaClient.setToken(tdaClient.getTokenByRefreshToken(tdaClient.getToken().getRefresh_token()));
-                    redirectToTda = false;
+                    try {
+                        tdaClient.setToken(tdaClient.getTokenByRefreshToken(tdaClient.getToken()));
+                        redirectToTda = false;
+                    } catch (Exception ex) {
+                        log.error("cannot refresh token: " + tdaClient.getToken().getRefresh_token());
+                        return true;
+                    }
                 }
             }
             return redirectToTda;
@@ -173,7 +178,10 @@ public class TdaController {
     @RequestMapping(value = "showSymbols")
     public ModelAndView showSymbols(HttpServletRequest request) {
         Map<String, ?> flashMap = RequestContextUtils.getInputFlashMap(request);
-        List<Quote> list = (List<Quote>) flashMap.get("list");
+        List<Quote> list = new ArrayList<>();
+        if (null != flashMap.get("list")) {
+            list = (List<Quote>) flashMap.get("list");
+        }
         String selectedSymbol = (String) flashMap.get("selectedSymbol");
         ModelAndView model = new ModelAndView("data");
         model.addObject("list", list);
@@ -262,6 +270,12 @@ public class TdaController {
         model.addObject("headers", headers);
         model.addObject("rows", rows);
         return model;
+    }
+
+    @RequestMapping(value = "optionChain", method = RequestMethod.GET)
+    public ResponseEntity<String> getOptionChain(HttpServletRequest request) {
+        String stock = request.getParameter("symbol");
+        return ResponseEntity.ok(tdaClient.getOptionChain(stock));
     }
 
     private Double formatDouble(double d) {

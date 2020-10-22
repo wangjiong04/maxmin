@@ -3,7 +3,6 @@ package com.maxmin.tda.dto;
 import lombok.Data;
 
 import java.time.Instant;
-import java.util.Date;
 
 @Data
 public class Token {
@@ -13,4 +12,5 @@ public class Token {
     private int expires_in;
     private int refresh_token_expires_in;
     private Instant tokenDate;
+    private Instant refreshTokenDate;
 }

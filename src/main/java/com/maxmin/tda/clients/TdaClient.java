@@ -56,7 +56,7 @@ public class TdaClient {
     }
 
     public Token getTokeByCode(String code) {
-        return getTokenFromTda(true, code);
+        return getTokenFromTda(true, code, 0, null);
     }
 
     public List<Quote> getQuotes(String accountId) throws IOException {
@@ -389,6 +389,20 @@ public class TdaClient {
         return list;
     }
 
+    public String getOptionChain(String symbols) {
+        String accessToken = getAccessToken();
+        if (StringUtils.isEmpty(accessToken)) {
+            return "Please log in again.";
+        }
+        String symbolURL = "https://api.tdameritrade.com/v1/marketdata/chains?symbol=" + symbols;
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity entity = getEntity(accessToken);
+        ResponseEntity<String> response = restTemplate
+                .exchange(symbolURL, HttpMethod.GET, entity, String.class);
+        return response.getBody();
+
+    }
+
     public Token csvToToken(List<String[]> csv) {
         Token token = new Token();
         token.setAccess_token(csv.get(0)[0]);
@@ -397,17 +411,19 @@ public class TdaClient {
         token.setRefresh_token_expires_in(Integer.valueOf(csv.get(0)[3]));
         token.setTokenDate(Instant.parse(csv.get(0)[4]));
         token.setToken_type(csv.get(0)[5]);
+        token.setRefreshTokenDate(Instant.parse(csv.get(0)[6]));
         return token;
     }
 
     public List<String[]> tokenToCSV(Token token) {
-        String[] strs = new String[6];
+        String[] strs = new String[7];
         strs[0] = token.getAccess_token();
         strs[1] = token.getRefresh_token();
         strs[2] = String.valueOf(token.getExpires_in());
         strs[3] = String.valueOf(token.getRefresh_token_expires_in());
         strs[4] = token.getTokenDate().toString();
         strs[5] = token.getToken_type();
+        strs[6] = token.getRefreshTokenDate().toString();
         List<String[]> list = new ArrayList<>();
         list.add(strs);
         return list;
@@ -437,26 +453,36 @@ public class TdaClient {
         return dateFormat.format(d);
     }
 
-    public Token getTokenByRefreshToken(String refreshToken) {
-        return getTokenFromTda(false, refreshToken);
+    public Token getTokenByRefreshToken(Token currentToken) {
+        Token newToken = getTokenFromTda(false, currentToken.getRefresh_token(), currentToken.getRefresh_token_expires_in(), currentToken.getRefreshTokenDate());
+        if (null == newToken.getRefresh_token()) {
+            newToken.setRefresh_token(currentToken.getRefresh_token());
+            newToken.setRefreshTokenDate(currentToken.getRefreshTokenDate());
+        }
+        return newToken;
     }
 
-    private Token getTokenFromTda(boolean byCode, String value) {
+    private Token getTokenFromTda(boolean byCode, String value, int expired_in, Instant refreshTokenDate) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
-        body.add("access_type", "offline");
+
         if (byCode) {
             body.add("code", value);
             body.add("grant_type", "authorization_code");
+            body.add("redirect_uri", redirect_uri);
+            body.add("access_type", "offline");
         } else {
             body.add("refresh_token", value);
             body.add("grant_type", "refresh_token");
+            if (isRefreshTokenWillExpired(expired_in, refreshTokenDate)) {
+                body.add("access_type", "offline");
+            }
         }
 
         body.add("client_id", client_id);
-        body.add("redirect_uri", redirect_uri);
+
         HttpEntity entity = new HttpEntity<>(body, headers);
 
 
@@ -466,6 +492,7 @@ public class TdaClient {
                 .exchange(access_token_url, HttpMethod.POST, entity, Token.class);
         Token token1 = token.getBody();
         token1.setTokenDate(Instant.now());
+        token1.setRefreshTokenDate(Instant.now());
         return token1;
     }
 
@@ -477,7 +504,7 @@ public class TdaClient {
             return token.getAccess_token();
         }
         if (!isRefreshTokenExpired()) {
-            this.token = getTokenByRefreshToken(token.getRefresh_token());
+            this.token = getTokenByRefreshToken(token);
             return token.getAccess_token();
         }
         return "";
@@ -489,7 +516,11 @@ public class TdaClient {
     }
 
     public boolean isRefreshTokenExpired() {
-        return null == token || isTokenExpired(token.getRefresh_token_expires_in(), token.getTokenDate());
+        return null == token || isTokenExpired(token.getRefresh_token_expires_in(), token.getRefreshTokenDate());
+    }
+
+    public boolean isRefreshTokenWillExpired(int getRefresh_token_expires_in, Instant RefreshTokenDate) {
+        return isTokenExpired(getRefresh_token_expires_in - 691200, RefreshTokenDate);
     }
 
     private boolean isTokenExpired(int expireSeconds, Instant tokenDate) {
