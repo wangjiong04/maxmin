@@ -273,7 +273,7 @@ public class TdaController {
     }
 
     @RequestMapping(value = "optionChain", method = RequestMethod.GET)
-    public ResponseEntity<String> getOptionChain(HttpServletRequest request) {
+    public ResponseEntity<OptionChain> getOptionChain(HttpServletRequest request) {
         String stock = request.getParameter("symbol");
         return ResponseEntity.ok(tdaClient.getOptionChain(stock));
     }
@@ -281,7 +281,7 @@ public class TdaController {
     @RequestMapping(value = "OptionChain", method = RequestMethod.GET)
     public ModelAndView getOptionChain1(HttpServletRequest request) {
         String stock = request.getParameter("symbol");
-        String result = tdaClient.getOptionChain(stock);
+        OptionChain result = tdaClient.getOptionChain(stock);
         ModelAndView model = new ModelAndView("OptionChain");
         model.addObject("result", result);
         return model;
