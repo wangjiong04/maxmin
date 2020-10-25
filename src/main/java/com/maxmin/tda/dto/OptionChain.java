@@ -2,11 +2,10 @@ package com.maxmin.tda.dto;
 
 import lombok.Data;
 
-import java.util.Dictionary;
+import java.util.HashMap;
 
 @Data
-public class OptionChain
-{
+public class OptionChain {
     private String symbol;
     private String status;
     private Underlying underlying;
@@ -19,6 +18,6 @@ public class OptionChain
     private double volatility;
     private double daysToExpiration;
     private int numberOfContracts;
-    private Dictionary<String, Dictionary<String, ExpDate[]>> putExpDateMap;
-    private Dictionary<String, Dictionary<String, ExpDate[]>> callExpDateMap;
+    private HashMap<String, HashMap<String, ExpDate[]>> putExpDateMap;
+    private HashMap<String, HashMap<String, ExpDate[]>> callExpDateMap;
 }

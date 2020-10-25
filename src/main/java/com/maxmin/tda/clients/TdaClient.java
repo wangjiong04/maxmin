@@ -395,7 +395,8 @@ public class TdaClient {
         String url="https://api.tdameritrade.com/v1/marketdata/chains?symbol=%s&apikey=%s&fromDate=%s&toDate=%s&includeQuotes=true&strategy=ANALYTICAL&range=NTM";
 
 
-        String symbolURL = String.format(url,symbols,client_id,LocalDateTime.now(),LocalDateTime.now().plusDays(1));
+        //String symbolURL = String.format(url,symbols,client_id,LocalDateTime.now(),LocalDateTime.now().plusDays(1));
+        String symbolURL = String.format(url,symbols,client_id,"2020-10-28","2020-10-30");
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<OptionChain> response = restTemplate
                 .exchange(symbolURL, HttpMethod.GET, null, OptionChain.class);
