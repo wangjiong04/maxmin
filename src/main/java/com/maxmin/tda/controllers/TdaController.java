@@ -273,9 +273,18 @@ public class TdaController {
     }
 
     @RequestMapping(value = "optionChain", method = RequestMethod.GET)
-    public ResponseEntity<OptionChain> getOptionChain(HttpServletRequest request) {
+    public ResponseEntity<List<OptionChain>> getOptionChain(HttpServletRequest request) {
         String stock = request.getParameter("symbol");
-        return ResponseEntity.ok(tdaClient.getOptionChain(stock));
+        if (stock == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        stock = stock.replace(" ", "");
+        List<String> symbols = Arrays.asList(stock.split(","));
+        if (symbols.isEmpty() || symbols.size() > 10) {
+            return ResponseEntity.badRequest().build();
+        }
+        List<OptionChain> chains = symbols.parallelStream().map(tdaClient::getOptionChain).collect(Collectors.toList());
+        return ResponseEntity.ok(chains);
     }
 
     @RequestMapping(value = "OptionChain", method = RequestMethod.GET)

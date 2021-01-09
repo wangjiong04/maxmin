@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxmin.tda.dto.*;
 import com.maxmin.tda.utils.ObjectMapperFactory;
-import com.sun.javafx.binding.StringFormatter;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -392,11 +390,11 @@ public class TdaClient {
     }
 
     public OptionChain getOptionChain(String symbols) {
-        String url="https://api.tdameritrade.com/v1/marketdata/chains?symbol=%s&apikey=%s&fromDate=%s&toDate=%s&includeQuotes=true&strategy=ANALYTICAL&range=NTM";
+        String url = "https://api.tdameritrade.com/v1/marketdata/chains?symbol=%s&apikey=%s&fromDate=%s&toDate=%s&includeQuotes=true&strategy=ANALYTICAL&range=NTM";
 
 
-        //String symbolURL = String.format(url,symbols,client_id,LocalDateTime.now(),LocalDateTime.now().plusDays(1));
-        String symbolURL = String.format(url,symbols,client_id,"2020-10-28","2020-10-30");
+        String symbolURL = String.format(url, symbols, client_id, LocalDateTime.now(), LocalDateTime.now().plusDays(7));
+        //String symbolURL = String.format(url,symbols,client_id,"2020-10-28","2020-10-30");
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<OptionChain> response = restTemplate
                 .exchange(symbolURL, HttpMethod.GET, null, OptionChain.class);
