@@ -3,7 +3,6 @@ package com.maxmin.tda.service;
 import com.maxmin.tda.clients.AwsClient;
 import com.maxmin.tda.clients.TdaClient;
 import com.maxmin.tda.dto.Token;
-import com.opencsv.exceptions.CsvException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -36,7 +35,7 @@ public class Scheduler {
                 token = tdaClient.getTokenByRefreshToken(token);
                 csv = tdaClient.tokenToCSV(token);
                 awsClient.writeCSV(csv, accountId);
-            } catch (IOException | CsvException ex) {
+            } catch (IOException ex) {
                 log.error("get csv failed", ex);
             } catch (Exception ex) {
                 log.error("refresh token error", ex);

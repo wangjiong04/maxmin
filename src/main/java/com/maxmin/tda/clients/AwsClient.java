@@ -1,9 +1,6 @@
 package com.maxmin.tda.clients;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.opencsv.exceptions.CsvException;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +28,7 @@ public class AwsClient {
     @Value("${secret_key}")
     private String secretKey;
 
-    private AmazonS3 s3client;
+    //    private AmazonS3 s3client;
     private final String bucketName = "trade-users";
 
     @PostConstruct
@@ -68,13 +65,14 @@ public class AwsClient {
         log.info("put files into s3");
     }
 
-    private S3ObjectInputStream getFileByName(String fileName) {
-        S3Object s3Object = s3client.getObject(bucketName, fileName);
-        return s3Object.getObjectContent();
-    }
+//    private S3ObjectInputStream getFileByName(String fileName) {
+//        S3Object s3Object = s3client.getObject(bucketName, fileName);
+//        return s3Object.getObjectContent();
+//        return null;
+//    }
 
     @Cacheable(key = "#fileName", value = "csv", condition = "#result != null")
-    public List<String[]> getCSV(String fileName) throws IOException, CsvException {
+    public List<String[]> getCSV(String fileName) throws IOException {
 //        log.info("get csv from s3 for: " + fileName);
 //        S3ObjectInputStream inputStream = getFileByName(fileName);
 //        InputStreamReader reader = new InputStreamReader(inputStream);

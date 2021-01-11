@@ -3,7 +3,6 @@ package com.maxmin.tda.controllers;
 import com.maxmin.tda.clients.AwsClient;
 import com.maxmin.tda.clients.TdaClient;
 import com.maxmin.tda.dto.*;
-import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,7 @@ public class TdaController {
     private static final Logger log = LoggerFactory.getLogger((TdaController.class));
 
     @PostMapping(value = "redirectPage")
-    public void redirect(HttpServletRequest request, HttpServletResponse response) throws IOException, CsvException, ParseException {
+    public void redirect(HttpServletRequest request, HttpServletResponse response) throws IOException, ParseException {
         List<String> files = awsClient.getFiles();
         log.info(files.toString());
         String accountId = "";
@@ -91,7 +90,7 @@ public class TdaController {
                 }
             }
             return redirectToTda;
-        } catch (CsvException | IOException ex) {
+        } catch (IOException ex) {
             log.error("get token from csv error for account: " + accountId, ex);
             return true;
         }
